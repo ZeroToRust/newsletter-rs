@@ -1,2 +1,1 @@
-# newsletter-rs
-A fast, simple and scalable email newsletter service built in Rust.
+# An email newsletter server
