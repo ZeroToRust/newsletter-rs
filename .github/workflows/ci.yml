@@ -1,0 +1,38 @@
+name: CI Pipeline
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    ci-checks:
+        name: Run CI checks
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Install Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                components: clippy, rustfmt
+            
+            - name: Format Check
+              run: cargo fmt --check
+
+            - name: Build with Warnings Denied
+              run: RUSTFLAGS="-D warnings" cargo build --release
+
+            - name: Run Tests with Nextest
+              uses: taiki-e/install-action@v2
+              with:
+                tool: nextest
+            - run: cargo nextest run
+
+            - name: Run Documentation Tests
+              run: cargo test --doc
+
+            - name: Run Security Audit
+              uses: actions-rust-lang/audit@v1
+
