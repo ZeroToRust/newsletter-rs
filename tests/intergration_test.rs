@@ -3,7 +3,6 @@ mod tests {
     use actix_web::{test, web, App, HttpResponse, Responder};
     #[actix_web::test]
     async fn health_check_test_get() {
-
         //creates and instance of a service app
         let app =
             test::init_service(App::new().route("/health-check", web::get().to(response))).await;
@@ -22,7 +21,7 @@ mod tests {
     #[test]
     #[should_panic]
     async fn failing_health_check_get() {
-                //creates and instance of a service app
+        //creates and instance of a service app
         let app =
             test::init_service(App::new().route("/health-check", web::get().to(response))).await;
         // This creates a request default instance that will request a failure status
