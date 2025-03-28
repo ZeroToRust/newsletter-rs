@@ -8,6 +8,7 @@ This allows subscribers to stay informed and gain deeper insights into a product
 
 A database is an organized collection of data stored electronically. It enables efficient data storage, retrieval, and manipulation with the help of a database management system (DBMS).
 
+
 ## Why Does an Email Newsletter Need a Database?"
 
 A database plays a crucial role in managing an email newsletter system by ensuring efficiency, personalization, and proper audience targeting. Here are some key benefits:
