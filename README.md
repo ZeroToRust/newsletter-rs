@@ -30,19 +30,7 @@ Ensure you have the following installed on your system:
    ```sh
    cargo build
    ```
-
-3. **Run Database Migrations**
-   ```sh
-   cargo install sqlx-cli
-   sqlx database create
-   sqlx migrate run
-   ```
-
-4. **Start the Server**
-   ```sh
-   cargo run
-   ```
-
+   
 ## Troubleshooting  
 - **Database Connection Issues:**  
   - Ensure PostgreSQL is installed and running.  
