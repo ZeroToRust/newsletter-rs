@@ -1,3 +1,4 @@
+
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 async fn response() -> impl Responder {
@@ -13,4 +14,3 @@ async fn main() -> std::io::Result<()> {
             .await;
 
     Ok(())
-}
