@@ -1,4 +1,3 @@
-/// The main function that prints a greeting message.
 fn main() {
     println!("{}", greet());
 }
