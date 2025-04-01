@@ -1,6 +1,6 @@
 # Email Newsletter Service
 
-A fast, simple, and scalable email newsletter service built in Rust. This project provides an efficient way to manage and send newsletters, ensuring reliability and performance.
+A fast, simple, and scalable email newsletter service for blogs, built in Rust. This project provides an efficient way to manage and send blog newsletters, ensuring reliability and performance.
 
 ## Features
 
@@ -41,8 +41,4 @@ Ensure you have the following installed on your system:
 
 If you encounter issues, feel free to open an issue in the repository.
 
-
-## License
-
-This project is licensed under the MIT License.
 
