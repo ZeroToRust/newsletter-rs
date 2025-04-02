@@ -1,38 +1,46 @@
 name: CI Pipeline
 
 on:
-    push:
-    pull_request:
+  pull_request:
 
 jobs:
-    ci-checks:
-        name: Run CI checks
-        runs-on: ubuntu-latest
+  ci-checks:
+    name: Run CI checks
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-            - name: Install Rust
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                components: clippy, rustfmt
-            
-            - name: Format Check
-              run: cargo fmt --check
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      
+      - name: Format Check
+        run: cargo fmt --all --check
 
-            - name: Build with Warnings Denied
-              run: RUSTFLAGS="-D warnings" cargo build --release
+      - name: Cargo Build
+        run: cargo build --all-features --all-targets
 
-            - name: Run Tests with Nextest
-              uses: taiki-e/install-action@v2
-              with:
-                tool: nextest
-            - run: cargo nextest run
+      - name: Cargo test
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+      - run: cargo nextest run --all-features --all-targets
 
-            - name: Run Documentation Tests
-              run: cargo test --doc
+      - name: Run Documentation Tests
+        run: cargo test --doc --all-features
 
-            - name: Run Security Audit
-              uses: actions-rust-lang/audit@v1
-
+  cargo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit
