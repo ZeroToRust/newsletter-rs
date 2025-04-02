@@ -5,11 +5,11 @@
 An email newsletter is system that is used to keep users update about the current changes and features of your company .
 
 This project is about building an email news letter.
-The the first part is to send blog post to user in a personalized manner. 
+The the first part is to send blog post to user in a personalized manner to all clients. 
 > Note
-- The server should be able to interact with the from end to get the users detail and store it in a database.
+- The server should be able to interact with the front end to get the users detail and store it in a database.
     
-- The app is supposed to get the users details and send send post to the user based on the user's interest
+- The app is supposed to get the users details and send post to the user based on the user's interest.
 
 
 
