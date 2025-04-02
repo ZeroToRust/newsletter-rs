@@ -9,13 +9,15 @@ This project is optimized for faster build and link times by using high-performa
 
 ## **Installation Instructions**  
 
-### **Linux (Ubuntu/Debian-based)**  
+### **Linux**  
 To install the `mold` linker, you can use `apt` package manager ship with Debian and Debian-based distributions.
+Additionally, clang is required as the linker driver to use `mold`
 
 ```sh
 sudo apt update
 sudo apt install mold clang  
 ```
+For other Linux distributions or package managers, refer to the [official mold installation guide](https://github.com/rui314/mold/blob/master/README.md).
 
 ### **macOS**  
 Ensure Xcode Command Line Tools are installed, then install `lld` via Homebrew:
