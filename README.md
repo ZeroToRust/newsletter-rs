@@ -38,7 +38,10 @@ Ensure you have the following installed on your system:
 - **Cargo Errors:**  
   - Run `cargo clean` followed by `cargo build` to resolve potential dependency issues.  
   - Ensure you are using the latest Rust and Cargo versions (`rustup update`).  
-
+- **Linking Issues:**  
+  - Ensure you have installed `mold` (Linux) or `lld` (macOS).  
+  - Refer to the [Build & Link Optimization Guide](./docs/build_optimization.md) for troubleshooting.  
+  
 If you encounter issues, feel free to open an issue in the repository.
 
 
