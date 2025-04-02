@@ -19,7 +19,10 @@ async fn health_check() -> String {
 mod test {
 
     use super::*;
-    use axum::{body::Body, http::{Request, StatusCode}};
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+    };
     use tower::ServiceExt; // for `oneshot` method
 
     #[tokio::test]
@@ -38,6 +41,5 @@ mod test {
 
         // Checking if the response was a successful one
         assert_eq!(response.status(), StatusCode::OK);
-
     }
 }
