@@ -18,6 +18,9 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
       
+      - name: Optimize Build Performance
+        uses: rui314/setup-mold@v1
+      
       - name: Format Check
         run: cargo fmt --all --check
 
