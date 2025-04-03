@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _server = axum::serve(address, app).await?;
     Ok(())
 }
-///# Health check message
+
 async fn health_check() -> String {
     "Health Check Successful".into()
 }
