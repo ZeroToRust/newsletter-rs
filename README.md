@@ -1,6 +1,6 @@
 # Email Newsletter Service
 
-A fast, simple, and scalable email newsletter service for blogs, built in Rust. This project provides an efficient way to manage and send blog newsletters, ensuring reliability and performance.
+A fast, simple, and scalable email newsletter service for blogs, built in Rust. This project provides an efficient way to manage and send blog newsletters.
 
 ## Features
 
@@ -14,9 +14,8 @@ A fast, simple, and scalable email newsletter service for blogs, built in Rust. 
 
 Ensure you have the following installed on your system:
 
-- [Rust](https://www.rust-lang.org/tools/install) (latest stable version recommended)
-- [Cargo](https://doc.rust-lang.org/cargo/)
-- [PostgreSQL](https://www.postgresql.org/) (for storing subscriber data)
+- [Rust & Cargo](https://www.rust-lang.org/tools/install) (latest stable version recommended)
+- [PostgreSQL](https://www.postgresql.org/) (Docker image recommended)
 
 ### Steps
 
@@ -26,7 +25,7 @@ Ensure you have the following installed on your system:
    cd newsletter-rs
    ```
 
-2. **Install Dependencies**
+2. **Build**
    ```sh
    cargo build
    ```
@@ -42,6 +41,3 @@ Ensure you have the following installed on your system:
   - Ensure you have installed `mold` (Linux) or `lld` (macOS).  
   - Refer to the [Build & Link Optimization Guide](./docs/build_optimization.md) for troubleshooting.  
   
-If you encounter issues, feel free to open an issue in the repository.
-
-
