@@ -1,7 +1,13 @@
 [package]
 name = "newsletter-rs"
 version = "0.1.0"
-edition = "2024"
+
+edition = "2021"
 
 [dependencies]
 post_scanner = "0.3.0"
+
+[lib]
+name = "newsletter_rs"
+path = "src/lib.rs"
+
