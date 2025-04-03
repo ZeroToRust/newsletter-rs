@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app = Router::new().route("/health_check", get(health_check));
     let address = TcpListener::bind("0.0.0.0:8080").await?;
    println!("Server serving on {}", address.local_addr()?);
-    let _server = axum::serve(address, app).await?;
+    axum::serve(address, app).await?;
     Ok(())
 }
 ///# Health check message
