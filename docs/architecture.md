@@ -11,15 +11,12 @@ The the first part is to send blog post to user in a personalized manner to all 
     
 - The app is supposed to get the users details and send post to the user based on the user's interest.
 
-
-
 ### 1.2 Key Features Of The Email NewsLetter
 The server should support the following
  - Multiple client connection
  - User authentication endpoint
  - Create post endpoint
  - Database connection
-
 
 ## 2. Architectural Overview
 ### 2.1 App Structure 
@@ -67,10 +64,3 @@ classDef larger font-size:50px;
     http://localhost:7879/app/blog : The menu for blog posts.
     http://localhost:7879/app/blog/create : To create a blog post.
     http://localhost:7879/app/blog/list : To show all created blog posts
-
-
-
-
-
-
-
