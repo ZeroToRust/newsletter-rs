@@ -12,5 +12,5 @@ tokio = { version = "1.44.1", features = ["full"] }
 tower = "0.5.2"
 
 [lib]
-name = "newsletter_rs"
+name = "newsletter"
 path = "src/lib.rs"
