@@ -52,7 +52,7 @@ classDef larger font-size:50px;
     - **Frontend:** The platform that allow the user to interact with the system.
 
     ### 2.2 Tools to use Use
-    - **Actix web:** A powerful and robust frame work that allows to build efficiently allow for easy scalability.
+    - **Axum:** A powerful and robust frame work that allows to build efficiently allow for easy scalability.
     - **Serde:** For serializing and deserializing data.
     - **Docker and Docker compose:** to run test locally .
     - **Postgres Database:** To manage client connections efficiently and create appropriate relationships.
