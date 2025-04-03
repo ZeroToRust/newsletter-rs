@@ -16,7 +16,7 @@ async fn health_check() -> String {
     "Health Check Successful".into()
 }
 #[cfg(test)]
-mod test {
+mod tests {
 
     use super::*;
     use axum::{
