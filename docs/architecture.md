@@ -63,12 +63,11 @@ classDef larger font-size:50px;
 
     ### 2.3 End Point Specifications
 
-    http://locahost:7879/app/: Root of the application
-
-    http://localhost:8080/app/login : For login users.
-
-    http://localhost:8080/app/login/users : For logged in users. 
-
-    http://localhost:8080/app/blog : The menu for blog posts.
-    http://localhost:8080/app/blog/create : To create a blog post.
-    http://localhost:8080/app/blog/list : To show all created blog posts
+    |EndPoints|Services|
+    |---------|---------|
+    |`http://locahost:7879/app/`| Root of the application|
+    |`http://localhost:8080/app/login`| For login users.|
+    |`http://localhost:8080/app/login/users` | For logged in users. |
+    |`http://localhost:8080/app/blog `| The menu for blog posts.|
+    |`http://localhost:8080/app/blog/create` | To create a blog post.|
+    |`http://localhost:8080/app/blog/list` | To show all created blog posts|
