@@ -6,10 +6,14 @@ edition = "2021"
 [dependencies]
 axum = "0.8.3"
 futures = { version = "0.3.31", features = ["thread-pool"] }
-hyper = { version = "1.6.0", features = ["full"] } # for simulating test
-reqwest = "0.12.15"
 tokio = { version = "1.44.1", features = ["full"] }
+hyper = { version = "1.6.0", features = ["full"] } # for simulating test
+eyre = "0.6.12"  # For convinient error handling
+
+[dev-dependencies]
+reqwest = "0.12.15"
 tower = "0.5.2"
+
 
 [lib]
 name = "newsletter"
