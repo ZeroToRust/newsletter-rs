@@ -1,50 +1,38 @@
-# What is a newsletter 
+# What's a newsletter 
 An email newsletter (or e-newsletter, online newsletter) is an email message sent to subscribers on a regular schedule. Newsletters are used along the customer journey, assisting subscribers with relevant content that helps them perform actions you expect them to perform.
 ## purpose of newsletter
 You can use newsletters to keep in touch with your subscribers, prospects, and customers along the customer journey. Well-planned email newsletters provide subscribers with relevant information and help them in the decision-making 
 ## How to Implement a newsletter for a blog
-## 1. Prepare the newsletter strategy
 
-**Define your newsletter objectives**
+To implement a database you need to take into consideration the following key components:
 
-Before setting out to create a newsletter, you should define your objectives. Successful newsletters are goal-oriented, audience-specific, and support a larger marketing strategy.
+1. **Database Management**
 
-**Decide how your newsletter will add new values**
+    Manage and store subscriber information efficiently.
+- Database Connection: Use a database connection library like diesel to establish a connection to a PostgreSQL database.
+- Subscription Table: Define a schema for the subscribers table to store email, name, and subscription status.
+- CRUD Operations: Implement functions to add, delete, read, and update subscriber information using ORM (Object-Relational Mapping) capabilities provided by diesel.
+2. **Email Sending**
 
-One of your top priorities in creating a newsletter should be providing real value to your subscribers. If your campaigns offer nothing but promotional content, your open rates and click-through rates will suffer.
+    Configure and send the newsletter to subscribers.
+- SMTP Client: Use the lettre library to configure and use an SMTP client for sending emails.
+- Email Template: Use a template engine like tera to create and manage HTML and plain text templates for the newsletter.
+- Email Sending Function: Implement a function to send the newsletter to all subscribers using the SMTP client and templates.
+3. **Content Generation**
 
-## 2. Choose a newsletter software
+    Gather and prepare the content for the newsletter.
+- Blog Post Retrieval: Use an HTTP client like reqwest to fetch recent blog posts from your blog's API or scrape the blog if necessary.
+- Content Curation: Select and summarize the most relevant and engaging blog posts, and include images and other media.
+- HTML Template: Use a template engine like tera to design and generate HTML content for the newsletter, ensuring it is visually appealing and easy to read.
+4. **Scheduling and Automation**
 
-Creating a newsletter is definitely simple, but making sure it gets delivered is another story. If you tried sending a campaign to even just a few hundred contacts in Gmail or Outlook, it’s unlikely to ever reach your subscribers’ inboxes. For this reason, having a dedicated email marketing platform is essential.
+    Automate the process of sending the newsletter at specific times.
+- Task Scheduling: Use a task scheduling library like cron to schedule the sending of emails at specific times or intervals.
+- Background Jobs: Use an asynchronous runtime like tokio to handle the sending of emails asynchronously, ensuring the main application remains responsive and can manage failures and retries.
+5. **Analytics and Feedback**
 
-## 3. Set up your newsletter email list
-
-Creating a newsletter is definitely simple, but making sure it gets delivered is another story. If you tried sending a campaign to even just a few hundred contacts in Gmail or Outlook, it’s unlikely to ever reach your subscribers’ inboxes. For this reason, having a dedicated email marketing platform is essential.
-- First, your email list should be 100% opt-in.
-- Second, you should never buy an email list. 
-- Third, don’t forget about email list cleaning.
-
-## 4. Create a newsletter subscription form
-
-
-One of the easiest ways to grow your contact list is to capture subscribers from your existing website traffic.
-
-## 5. Attract newsletter subscribers
-
-When deciding where to place your signup forms, it’s important to strike a balance between prioritizing visibility and being mindful of the user experience.
-
-## 6. Create your newsletter campaign with Brevo
-To create a newsletter with Brevo, you can follow this link [help](https://www.brevo.com/blog/how-to-create-a-newsletter/)
-
-## 7. Preview and send a test newsletter
-
-You should always test your campaign before you email clients and contacts! Doing so will help you catch any issues before the email lands in inboxes. (And be sure to test both on desktop and mobile devices).
-
-
-## 8. Send your newsletter
-
-The final step before your newsletter reaches your audience is to schedule your campaign.
-
-## 9. Track newsletter performance
-
-Reviewing your newsletter performance is an essential part of an effective email marketing strategy.
+    Track the performance of the newsletter and gather feedback to improve future issues.
+- Open Rates: Use an email tracking service or implement tracking pixels to track how many recipients open the newsletter.
+- Click Rates: Use URL shorteners or tracking services with unique parameters to track how many recipients click on links in the newsletter.
+- Feedback: Provide a way for recipients to give feedback or suggest improvements, such as including a feedback form or a direct email address in the newsletter.
+- Unsubscribe Rates: Monitor the number of unsubscribes to understand reader engagement and identify potential issues, and use unsubscribe pages to gather reasons for unsubscribing.
