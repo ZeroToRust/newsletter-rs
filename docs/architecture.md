@@ -65,7 +65,7 @@ classDef larger font-size:50px;
 
     |EndPoints|Services|
     |---------|---------|
-    |`http://locahost:7879/app/`| Root of the application|
+    |`http://locahost:8080/app/`| Root of the application|
     |`http://localhost:8080/app/login`| For login users.|
     |`http://localhost:8080/app/login/users` | For logged in users. |
     |`http://localhost:8080/app/blog `| The menu for blog posts.|
