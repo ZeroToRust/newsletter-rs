@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
 async fn health_check() -> impl IntoResponse {
     StatusCode::OK
 }
-/// This test module is to pass the workflow checks 
+/// This test module is to pass the workflow checks
 #[cfg(test)]
 mod tests {
     #[test]
