@@ -1,6 +1,5 @@
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use eyre::Result;
-
 use tokio::net::TcpListener;
 
 /// Entry point for different services
@@ -17,9 +16,7 @@ async fn main() -> Result<()> {
 async fn health_check() -> impl IntoResponse {
     StatusCode::OK
 }
+
 /// This test module is to pass the workflow checks
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn testing_to_pass_workflow() {}
-}
+#[test]
+fn testing_to_pass_workflow() {}

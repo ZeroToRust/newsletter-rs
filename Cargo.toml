@@ -4,12 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.8.3"
-hyper = { version = "1.6.0", features = ["full"] } 
-tokio = { version = "1.44.2", features = ["full"] }
-eyre = "0.6.12"  # For convinient error handling
+axum = "0.8"  
+eyre = "0.6"  # For convinient error handling  
+tokio = { version = "1", features = ["full"] }  
 
 [dev-dependencies]
-reqwest = "0.12.15"
-tower = "0.5.2"
-futures = { version = "0.3.31", features = ["thread-pool"] }
