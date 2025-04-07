@@ -8,6 +8,7 @@ An email newsletter is system that is used to keep users update about the curren
 
 This project is about building an email newsletter.
 The the first part is to send blog post to user in a personalized manner to all clients. 
+
 > Note:
 
 - The server should be able to interact with the front end to get the users detail and store it in a database.
@@ -17,10 +18,10 @@ The the first part is to send blog post to user in a personalized manner to all 
 
 The server should support the following
 
-    - Multiple client connection
-    - User authentication endpoint
-    - Create post endpoint
-    - Database for persistence
+- Multiple client connection
+- User authentication endpoint
+- Create post endpoint
+- Database for persistence
 
 ## 2. Architectural Overview
 
