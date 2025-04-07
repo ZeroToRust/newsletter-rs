@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "*"
-futures = "*"
+axum = "0.8"  
+eyre = "0.6"  # For convinient error handling  
+tokio = { version = "1", features = ["full"] }  
 
-
+[dev-dependencies]
