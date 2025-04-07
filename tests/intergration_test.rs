@@ -1,12 +1,18 @@
 #[cfg(test)]
 mod tests {
-    use axum::{body::Body, http::{Request, StatusCode}, response::IntoResponse, routing::get, Router};
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+        response::IntoResponse,
+        routing::get,
+        Router,
+    };
     use tower::ServiceExt; // for provide oneshot method that is used to send client request to the server
 
     ///# Health check message
-async fn health_check() -> impl IntoResponse {
-    StatusCode::OK
-}
+    async fn health_check() -> impl IntoResponse {
+        StatusCode::OK
+    }
 
     #[tokio::test]
     async fn test_health_check() {
@@ -32,4 +38,3 @@ async fn health_check() -> impl IntoResponse {
         assert_eq!(response2.status(), StatusCode::NOT_FOUND);
     }
 }
-
