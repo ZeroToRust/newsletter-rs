@@ -7,8 +7,7 @@ Rust provides a framework like actix that is very performant and has a low laten
 
 -  It uses a threadpool that is implemented by default to handle multiple request asynchronously .
 -  It ensures performance by avoiding shared state between threads.
--  It provides a middleware that allow for efficient api interactions.
-
+-  It provides a middleware that allows for efficient API interactions.
 > **Note**: 
 
 Even though axum is also very efficient in catching errors(enforcing rust rules) a and easy to use and uses middle ware provided by tower and tower-http which has much more features than actix web for handling apis, actix web is still very efficient when it comes to scalability since it consumes less computer resources. 
