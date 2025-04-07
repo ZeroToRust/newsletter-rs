@@ -1,10 +1,26 @@
 #!/bin/bash
 
 set -ex #Debuging and handling errors
+export PATH="$HOME/.cargo/bin:$PATH"
+
+#Declare enviroment variables
+DB_USER="${POSTGRES_USER:=postgres}"
+DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
+DB_NAME="${POSTGRES_DB:=newslette}"
+DB_PORT="${POSTGRES_PORT:=5432}"
+DB_HOST="${POSTGRES_HOST:=localhost}"
+SKIP_DOCKER="${SKIP_DOCKER:=false}"
+DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
 # check if sqlx is installed
 if ! sqlx --version >/dev/null 2>&1; then
     echo "sqlx is not installed. Please install it."
+    exit 1
+fi
+
+# check if psql is installed 
+if ! psql --version >/dev/null 2>&1; then
+    echo "Psql required but not found"
     exit 1
 fi
 
@@ -16,8 +32,7 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
     fi
 
     echo "docker initialisation"
-        sudo docker run \
-        --name "${DB_NAME}my-container" \
+         docker run \
         -e POSTGRES_USER="$DB_USER" \
         -e POSTGRES_PASSWORD="$DB_PASSWORD" \
         -e POSTGRES_DB="$DB_NAME" \
@@ -27,20 +42,8 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
 
 fi
 
-# else check if psql is intalled
-if ! psql --version >/dev/null 2>&1; then
-    echo "Psql required but not found"
-    exit 1
-fi
 
-#Declare enviroment variables
-DB_USER="${POSTGRES_USER:=postgres}"
-DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
-DB_NAME="${POSTGRES_DB:=newsletter}"
-DB_PORT="${POSTGRES_PORT:=5432}"
-DB_HOST="${POSTGRES_HOST:=localhost}"
-SKIP_DOCKER="${SKIP_DOCKER:=false}"
-DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
 
 export PGPASSWORD="${DB_PASSWORD}"
 until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
