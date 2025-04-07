@@ -27,20 +27,19 @@ jobs:
       - name: Cargo Build
         run: cargo build --all-features --all-targets
 
-      - name: Install test tools
+      - name: Cargo test
         uses: taiki-e/install-action@v2
         with:
-          tool: nextest cargo-machete
-
-      - name: Cargo test
-        run: cargo nextest run --all-features --all-targets
+          tool: nextest
+      - run: cargo nextest run --all-features --all-targets
 
       - name: Run Documentation Tests
         run: cargo test --doc --all-features
 
       - name: Check for unused dependencies
-        run: cargo machete check --fail --with-metadata
-
+        uses: bnjbvr/cargo-machete@main
+        with:
+          args: check --fail --with-metadata
       
   cargo-audit:
     runs-on: ubuntu-latest
