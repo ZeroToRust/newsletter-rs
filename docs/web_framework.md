@@ -5,7 +5,7 @@ Among the vast options of framework rust provides it is important to choose a fr
 Rust provides a framework like actix that is very performant and has a low latency with. Also actix consumes less resources like CPU and Memory as it uses asynchronous programming approach.
 ## Features that actix-web offer
 
--  It uses a threadpool that is implemented by default to handle multiple request asynchronously .
+-  It uses a threadpool that is implemented by default to handle multiple requests asynchronously.
 -  It ensures performance by avoiding shared state between threads.
 -  It provides a middleware that allows for efficient API interactions.
 > **Note**: 
