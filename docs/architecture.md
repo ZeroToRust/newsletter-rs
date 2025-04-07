@@ -5,7 +5,7 @@
 
 An email newsletter is system that is used to keep users update about the current changes and features of your company .
 
-This project is about building an email news letter.
+This project is about building an email newsletter.
 The the first part is to send blog post to user in a personalized manner to all clients. 
 > Note
 - The server should be able to interact with the front end to get the users detail and store it in a database.
