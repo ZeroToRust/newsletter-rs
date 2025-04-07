@@ -1,6 +1,6 @@
 # Database Selection 
 
-In this project we will need to choose an approprait database to support our requirements 
+This involves choosing the best database to meet the project requirements.
 
 ## Why Does an Email Newsletter Need a Database?"
 
@@ -21,7 +21,8 @@ A database plays a crucial role in managing an email newsletter system by ensuri
   -  If an email fails to send, the database ensures it can be retried without duplication
 
 ## Comparing Database Types
-To determine the best choice, let’s compare different types of databases:
+Comparing different database types will help to determine the best choice.  
+
 
 |Database type|Exmaples | Adantages | Disadvantages|
 |---------|------------|------------|---------------|
@@ -67,3 +68,5 @@ PostgreSQL offers:
    -  Recording delivery status of sent emails.
 
    -  Accurately updating user preferences without corruption.
+
+So these are all the reasons that makes postgreSQL the best choice for our Email Newsletter .
