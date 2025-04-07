@@ -30,7 +30,7 @@ jobs:
       - name: Install test tools
         uses: taiki-e/install-action@v2
         with:
-          tool: nextest cargo-machete cargo-audit
+          tool: nextest cargo-machete
 
       - name: Cargo test
         run: cargo nextest run --all-features --all-targets
@@ -41,5 +41,15 @@ jobs:
       - name: Check for unused dependencies
         run: cargo machete check --fail --with-metadata
 
-      - name: Run cargo-audit
-        run: cargo audit
+      
+  cargo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit
