@@ -36,7 +36,7 @@ jobs:
       - name: Run Documentation Tests
         run: cargo test --doc --all-features
 
-      - name: Install cargo-machete and Check for unused dependencies
+      - name: Check for unused dependencies
         uses: bnjbvr/cargo-machete@main
         with:
           args: check --fail 
