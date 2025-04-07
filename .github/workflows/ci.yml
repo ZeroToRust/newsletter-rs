@@ -37,9 +37,9 @@ jobs:
         run: cargo test --doc --all-features
 
       - name: Install cargo-machete and Check for unused dependencies
-        run: |
-          cargo install cargo-machete
-          cargo machete check --fail
+        uses: bnjbvr/cargo-machete@main
+        with:
+          args: check --fail 
       
   cargo-audit:
     runs-on: ubuntu-latest
