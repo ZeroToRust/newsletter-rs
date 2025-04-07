@@ -44,12 +44,15 @@ This diagram represent the interaction between the different components of the s
 ```mermaid 
 
 flowchart TD
-    A(("FrontEnd (User)")) -->  B[App server]:::larger
+    A(("FrontEnd (User)")) -->  B[App]:::larger
     B --api--> A
-    B --api--> C["Database "]:::large
-    C --api--> B
-    D[App]:::large --api--> B
-    B --api--> D
+    A --> F[Auth] 
+    E--api--> C["Database "]:::large
+    C --api--> E
+    D[App Logic]:::large --api--> E
+    E --api--> D
+    E --api--> B
+    B --api--> E[App Server]:::large
 
 classDef large font-size:30px;
 classDef larger font-size:50px; 
@@ -76,6 +79,6 @@ classDef larger font-size:50px;
 |`http://locahost:8080/app/`| Root of the application|
 |`http://localhost:8080/app/login`| For login users.|
 |`http://localhost:8080/app/login/users` | For logged in users. |
-|`http://localhost:8080/app/blog `| The menu for blog posts.|
+|`http://localhost:8080/app/blog`| The menu for blog posts.|
 |`http://localhost:8080/app/blog/create` | To create a blog post.|
 |`http://localhost:8080/app/blog/list` | To show all created blog posts|
