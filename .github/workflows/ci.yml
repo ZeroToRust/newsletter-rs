@@ -36,6 +36,11 @@ jobs:
       - name: Run Documentation Tests
         run: cargo test --doc --all-features
 
+      - name: Check for unused dependencies
+        run: |
+          cargo install cargo-machete
+          cargo machete check --fail
+          
   cargo-audit:
     runs-on: ubuntu-latest
     steps:
