@@ -1,34 +1,35 @@
-#![cfg(test)]
+#[cfg(test)]
 mod tests {
-    use actix_web::{test, web, App, HttpResponse, Responder};
-    #[actix_web::test]
-    async fn health_check_test_get() {
-        //creates and instance of a service app
-        let app =
-            test::init_service(App::new().route("/health-check", web::get().to(response))).await;
-        // This creates a request instance
-        let request = test::TestRequest::get().uri("/health-check").to_request();
+    use axum::{body::Body, http::{Request, StatusCode}, response::IntoResponse, routing::get, Router};
+    use tower::ServiceExt; // for provide oneshot method that is used to send client request to the server
 
-        let response = test::call_service(&app, request).await;
+    ///# Health check message
+async fn health_check() -> impl IntoResponse {
+    StatusCode::OK
+}
 
-        assert!(response.status().is_success())
-    }
+    #[tokio::test]
+    async fn test_health_check() {
+        // Create the app with the route
+        let app = Router::new().route("/health_check", get(health_check));
+        // This Simulate a GET request to the `/health_check` route like a client
+        let request = Request::builder()
+            .uri("/health_check")
+            .method("GET")
+            .body(Body::empty())
+            .unwrap();
+        // Sending a bad request
+        let request2 = Request::builder()
+            .uri("/app/check")
+            .method("GET")
+            .body(Body::empty())
+            .unwrap();
+        let response2 = app.clone().oneshot(request2).await.unwrap();
 
-    async fn response() -> impl Responder {
-        HttpResponse::Ok()
-    }
-
-    #[test]
-    #[should_panic]
-    async fn failing_health_check_get() {
-        //creates and instance of a service app
-        let app =
-            test::init_service(App::new().route("/health-check", web::get().to(response))).await;
-        // This creates a request default instance that will request a failure status
-        let request = test::TestRequest::default().to_request();
-
-        let response = test::call_service(&app, request).await;
-
-        assert!(response.status().is_success())
+        // simulate the process of sending the request to the app like when a client navigate to the path on the browser
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response2.status(), StatusCode::NOT_FOUND);
     }
 }
+
