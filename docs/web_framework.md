@@ -1,9 +1,8 @@
-# Frame Work Used
+# Framework Used
 
-Among the vast options of frame work rust provides it is important to choose a framework that allow for performance and efficiency even for large scale applications.
+Among the vast options of framework rust provides it is important to choose a framework that allow for performance and efficiency even for large scale applications.
 
-Rust provides a frame work like actix that is very performant and has a low latency with. Also actix consumes less resources like CPU and Memory as it uses asynchronous programming approach.
-
+Rust provides a framework like actix that is very performant and has a low latency with. Also actix consumes less resources like CPU and Memory as it uses asynchronous programming approach.
 ## Features that actix-web offer
 
 -  It uses a threadpool that is implemented by default to handle multiple request asynchronously .
