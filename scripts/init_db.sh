@@ -17,7 +17,7 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
 
     echo "docker initialisation"
         sudo docker run \
-        --name "${DB_NAME}my_container" \
+        --name "${DB_NAME}my-container" \
         -e POSTGRES_USER="$DB_USER" \
         -e POSTGRES_PASSWORD="$DB_PASSWORD" \
         -e POSTGRES_DB="$DB_NAME" \
