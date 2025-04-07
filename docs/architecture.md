@@ -46,7 +46,6 @@ This diagram represent the interaction between the different components of the s
 flowchart TD
     A(("FrontEnd (User)")) -->  B[App]:::larger
     B --api--> A
-    A --> F[Auth] 
     E--api--> C["Database "]:::large
     C --api--> E
     D[App Logic]:::large --api--> E
