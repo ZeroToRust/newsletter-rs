@@ -6,7 +6,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 #Declare enviroment variables
 DB_USER="${POSTGRES_USER:=postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
-DB_NAME="${POSTGRES_DB:=newslette}"
+DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 DB_HOST="${POSTGRES_HOST:=localhost}"
 SKIP_DOCKER="${SKIP_DOCKER:=false}"
