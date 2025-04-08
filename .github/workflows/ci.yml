@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+
+jobs:
+  ci-checks:
+    name: Run CI checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      
+      - name: Optimize Build Performance
+        uses: rui314/setup-mold@v1
+      
+      - name: Format Check
+        run: cargo fmt --all --check
+
+      - name: Cargo Build
+        run: cargo build --all-features --all-targets
+
+      - name: Cargo test
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+      - run: cargo nextest run --all-features --all-targets
+
+      - name: Run Documentation Tests
+        run: cargo test --doc --all-features
+
+  cargo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit
