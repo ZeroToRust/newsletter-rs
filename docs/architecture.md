@@ -1,4 +1,4 @@
-# Email Newsletter Architecture
+# Email Newsletter Server Architecture
 
 ## 1. Introduction
 
