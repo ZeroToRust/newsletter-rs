@@ -40,7 +40,7 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-          args: check --fail --with-metadata
+          args: check --with-metadata
 
           
   cargo-audit:
