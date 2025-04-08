@@ -42,8 +42,12 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
 
 fi
 
-
-
+if [[ "$DB_PASSWORD" == "password" ]]; then
+  echo "Password is correct"
+else
+  echo "password is wrong"
+  exit 1 
+fi
 
 export PGPASSWORD="${DB_PASSWORD}"
 until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
