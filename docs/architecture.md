@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 ### 1.1 Purpose 
-An email newsletter is system that is used to keep users update about the current changes and features of your company .
+An email newsletter system is used to keep users updated about the current changes and features of your company.
 This project is about building an email news letter.
 
 ### 1.2 Key Features
