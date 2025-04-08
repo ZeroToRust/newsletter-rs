@@ -37,10 +37,12 @@ jobs:
         run: cargo test --doc --all-features
 
       - name: Check for unused dependencies
-        uses: bnjbvr/cargo-machete@main
+        uses: taiki-e/install-action@v2
         with:
+          tool: cargo-machete
           args: check --fail --with-metadata
-      
+
+          
   cargo-audit:
     runs-on: ubuntu-latest
     steps:
