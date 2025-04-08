@@ -67,4 +67,6 @@ PostgreSQL offers:
   - Recording delivery status of sent emails.  
   - Accurately updating user preferences without corruption.  
 
-So these are all the reasons that makes postgreSQL a strong  choice for our Email Newsletter .
+So these are all the reasons that makes postgreSQL a strong  choice for our Email Newsletter.
+
+
