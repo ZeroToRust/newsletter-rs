@@ -42,13 +42,6 @@ if [[ -z "${SKIP_DOCKER}" ]]; then
 
 fi
 
-if [[ "$DB_PASSWORD" == "password" ]]; then
-  echo "Password is correct"
-else
-  echo "password is wrong"
-  exit 1 
-fi
-
 export PGPASSWORD="${DB_PASSWORD}"
 until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
     echo >&2 "Postgres is still unavailable - sleeping..."
@@ -59,5 +52,6 @@ echo "Applying migrations..."
 
 export DATABASE_URL
 sqlx database create
+sqlx migrate add init 
 sqlx migrate run
 echo "Database is ready!"
