@@ -42,8 +42,11 @@ Ensure you have the following installed on your system:
   - Ensure you have installed `mold` (Linux) or `lld` (macOS).  
   - Refer to the [Build & Link Optimization Guide](./docs/build_optimization.md) for troubleshooting.  
   
+<<<<<<< HEAD
 =======
 # An email newsletter server
 
 
 >>>>>>> 16aa7d0 (docs:updated  docs)
+=======
+>>>>>>> e391534 (Chore:update documentation)
