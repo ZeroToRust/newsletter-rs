@@ -17,18 +17,10 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
-
+      
       - name: Optimize Build Performance
         uses: rui314/setup-mold@v1
-
-      - name: Install Tools
-        uses: taiki-e/install-action@v2
-        with:
-          tool: |
-            nextest
-            cargo-machete
-            cargo-audit
-
+      
       - name: Format Check
         run: cargo fmt --all --check
 
@@ -36,22 +28,29 @@ jobs:
         run: cargo build --all-features --all-targets
 
       - name: Cargo test
-        run: cargo nextest run --all-features --all-targets
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+      - run: cargo nextest run --all-features --all-targets
 
       - name: Run Documentation Tests
         run: cargo test --doc --all-features
 
       - name: Check for unused dependencies
-        run: cargo machete check --fail --with-metadata
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-machete
+          args: check --fail --with-metadata
 
+          
   cargo-audit:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v4
-
       - name: Install stable toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Run Cargo Audit
-        run: cargo audit
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit
