@@ -8,4 +8,6 @@ axum = "0.8"
 eyre = "0.6"  # For convinient error handling  
 tokio = { version = "1", features = ["full"] }  
 
-[dev-dependencies]
+[lib]
+name = "newsletter_rs"
+path = "src/lib.rs"
