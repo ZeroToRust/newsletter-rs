@@ -61,14 +61,18 @@ classDef larger font-size:50px;
 #### Components
 
 - **App Server:** It is the server of the system and precise the endpoints for hosting the different services.
-- **App:** It implement all the details of creating a blog post and sending it to the user via and email using the rust.
+- **App Logic:** It implement all the details of creating a blog post and sending it to the user via and email using the rust.
 - **Database:** It is used to store user credentials and personal info.
-- **Frontend:** The platform that allow the user to interact with the system.
 
-### 2.2 Tools to use Use
+
+### 2.2 Tools and libraries to use Use
 
 - **Axum:** A powerful and robust frame work that allows to build efficiently allow for easy scalability.
+- **Tokio:** which is an asynchronous runtime for axum.
+- **Tracing and chrono:** For logging everything happening on our server.
 - **Serde:** For serializing and deserializing data.
+- **eyre:** For well formatted and designed error display .
+- **Sqlx:** As an ORM to communicate with our database directly through our app.
 - **Docker and Docker compose:** to run test locally .
 - **Postgres Database:** To manage client connections efficiently and create appropriate relationships.
 
