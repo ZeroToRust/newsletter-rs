@@ -1,17 +1,18 @@
 use serde::Deserialize;
 /// Returns a greeting message.
 use sqlx::PgPool;
-use 
+use dotenvy::{self, dotenv, var};
 
 #[derive(Deserialize)]
 pub struct SubscriptionData {
-    name: String,
-    email: String,
+    pub name: String,
+    pub email: String,
 }
 
-async fn store_subscriber(data: &SubscriptionData) -> Result<(), sqlx::Error> {
-    let durl = str::env::var("DATABASE_URL");
-    let pool = PgPool::connect(&durl).await?;
+pub async fn store_subscriber(data: &SubscriptionData) -> Result<(), sqlx::Error> {
+    dotenv().ok();
+    let durl = var("DATABASE_URL").unwrap();
+    let pool = PgPool::connect(&durl).await.expect("Failed to connect to db");
 
     sqlx::query!(
         r##"
@@ -21,7 +22,7 @@ async fn store_subscriber(data: &SubscriptionData) -> Result<(), sqlx::Error> {
         data.name,
         data.email
     )
-    .execute(pool)
+    .execute(&pool)
     .await?;
     Ok(())
 }

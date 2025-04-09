@@ -1,5 +1,3 @@
-mod state;
-mod config;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use eyre::Result;
 use sqlx::PgPool;
