@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use 
 
 #[derive(Deserialize)]
-struct SubscriptionData {
+pub struct SubscriptionData {
     name: String,
     email: String,
 }
