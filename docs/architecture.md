@@ -64,10 +64,22 @@ classDef larger font-size:50px;
 - **App Logic:** It implement all the details of creating a blog post and sending it to the user via and email using the rust.
 - **Database:** It is used to store user credentials and personal info.
 
+<<<<<<< HEAD
 
 ### 2.2 Tools and libraries to use Use
 
 - **Axum framework:** A powerful and robust frame work that allows to build efficiently allow for easy scalability.
+=======
+
+### 2.2 Tools and libraries to use Use
+
+- **Axum:** A powerful and robust frame work that allows to build efficiently allow for easy scalability.
+- **Tokio:** which is an asynchronous runtime for axum.
+- **Tracing and chrono:** For logging everything happening on our server.
+- **Serde:** For serializing and deserializing data.
+- **eyre:** For well formatted and designed error display .
+- **Sqlx:** As an ORM to communicate with our database directly through our app.
+>>>>>>> 347991de642400a34d227ccf243d96de4b40e5c2
 - **Docker and Docker compose:** to run test locally .
 - **Postgres Database:** To manage client connections efficiently and create appropriate relationships.
 
