@@ -33,6 +33,13 @@ jobs:
       - name: Run Documentation Tests
         run: cargo test --doc --all-features
 
+      - name: Check for unused dependencies
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-machete
+          args: check --with-metadata
+
+          
   cargo-audit:
     runs-on: ubuntu-latest
     steps:
