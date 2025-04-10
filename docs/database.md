@@ -65,8 +65,6 @@ PostgreSQL offers:
   PostgreSQL ensures reliable data consistency by:  
   - Safely handling email subscriptions without errors.  
   - Recording delivery status of sent emails.  
-  - Accurately updating user preferences without corruption.  
+  - Accurately updating user preferences without corruption.
 
 So these are all the reasons that makes postgreSQL a strong  choice for our Email Newsletter.
-
-
