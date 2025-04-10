@@ -1,6 +1,5 @@
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use eyre::Result;
-use sqlx::PgPool;
 use tokio::net::TcpListener;
 
 /// Entry point for different services
