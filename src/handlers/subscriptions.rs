@@ -107,10 +107,7 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_getters() {
-        let request = SubscribeRequest::new(
-            "John Doe".to_string(),
-            "john@example.com".to_string(),
-        );
+        let request = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
 
         assert_eq!(request.name(), "John Doe");
         assert_eq!(request.email(), "john@example.com");
@@ -118,10 +115,8 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_setters() {
-        let mut request = SubscribeRequest::new(
-            "John Doe".to_string(),
-            "john@example.com".to_string(),
-        );
+        let mut request =
+            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
 
         request.set_name("Jane Doe".to_string());
         request.set_email("jane@example.com".to_string());
