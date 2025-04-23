@@ -1,10 +1,10 @@
-use serde::Deserialize;
-use validator::{Validate, ValidationError};
 use axum::{
     extract::Form,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use serde::Deserialize;
+use validator::Validate;
 
 /// Represents the request payload for a subscription.
 ///
@@ -31,6 +31,10 @@ pub struct SubscribeRequest {
 }
 
 impl SubscribeRequest {
+    pub fn new(name: String, email: String) -> Self {
+        Self { name, email }
+    }
+
     /// Returns the name of the subscriber.
     pub fn name(&self) -> &str {
         &self.name
@@ -77,7 +81,11 @@ impl SubscribeRequest {
 /// ```
 pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
     if let Err(errors) = payload.validate() {
-        return (StatusCode::BAD_REQUEST, format!("Validation error: {}", errors)).into_response();
+        return (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            format!("Validation error: {}", errors),
+        )
+            .into_response();
     }
 
     let subscription_info = format!(
@@ -96,10 +104,7 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_getters() {
-        let request = SubscribeRequest {
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
-        };
+        let request = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
 
         assert_eq!(request.name(), "John Doe");
         assert_eq!(request.email(), "john@example.com");
@@ -107,10 +112,8 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_setters() {
-        let mut request = SubscribeRequest {
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
-        };
+        let mut request =
+            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
 
         request.set_name("Jane Doe".to_string());
         request.set_email("jane@example.com".to_string());
