@@ -8,6 +8,7 @@ async fn main() {
     let app = build_app();
 
     // Run the application
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    println!("Server Running on http://0.0.0.0:8080");
     serve(listener, app).await.unwrap();
 }

@@ -4,12 +4,13 @@ use axum::{
 };
 use http_body_util::BodyExt;
 use newsletter_rs::handlers::subscriptions::SubscribeRequest;
+use sqlx::{PgPool, Row};
 use tower::ServiceExt;
 
 mod common;
 
 #[tokio::test]
-async fn subscribe_returns_200_for_valid_form_data() {
+async fn subscribe_returns_200_for_valid_form_data_and_stores_user() {
     // Arrange
     let app = common::spawn_app();
     let test_case = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
@@ -31,10 +32,24 @@ async fn subscribe_returns_200_for_valid_form_data() {
         .await
         .unwrap();
 
-    // Assert
+    // Assert: Ensure the response status is 200
     assert_eq!(response.status(), StatusCode::OK);
     let body = response.into_body().collect().await.unwrap().to_bytes();
     assert_eq!(&body[..], b"Subscription successful!");
+
+    // Assert: Check if the user is stored in the database
+    let pool: PgPool = common::get_database_pool().await;
+    let row = sqlx::query("SELECT name, email FROM subscriptions WHERE email = $1")
+        .bind(test_case.email())
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to fetch user from database");
+
+    let stored_name: String = row.get("name");
+    let stored_email: String = row.get("email");
+
+    assert_eq!(stored_name, test_case.name());
+    assert_eq!(stored_email, test_case.email());
 }
 
 #[tokio::test]
@@ -79,4 +94,18 @@ async fn subscribe_returns_422_for_invalid_email() {
 
     // Assert
     assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+}
+
+#[tokio::test]
+async fn database_connection_is_successful() {
+    // Arrange
+    let pool: PgPool = common::get_database_pool().await;
+
+    // Act: Attempt to query the database
+    let result = sqlx::query("SELECT 1")
+        .fetch_one(&pool)
+        .await;
+
+    // Assert: Ensure the query succeeds
+    assert!(result.is_ok());
 }
