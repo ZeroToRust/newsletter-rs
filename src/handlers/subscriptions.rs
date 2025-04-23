@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde::Deserialize;
-use validator::Validate;
+use std::error::Error;
 
 /// Represents the request payload for a subscription.
 ///
@@ -19,14 +19,12 @@ use validator::Validate;
 /// - `email(&self) -> &str`: Returns the email address of the subscriber.
 /// - `set_name(&mut self, name: String)`: Sets the name of the subscriber.
 /// - `set_email(&mut self, email: String)`: Sets the email address of the subscriber.
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize)]
 pub struct SubscribeRequest {
     /// The name of the subscriber.
-    #[validate(length(min = 1, message = "Name is required"))]
     name: String,
 
     /// The email address of the subscriber.
-    #[validate(email(message = "Invalid email format"))]
     email: String,
 }
 
@@ -54,7 +52,36 @@ impl SubscribeRequest {
     pub fn set_email(&mut self, email: String) {
         self.email = email;
     }
+
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.name.trim().is_empty() {
+            return Err(ValidationError::NameRequired);
+        }
+
+        if !self.email.contains('@') || !self.email.contains('.') {
+            return Err(ValidationError::InvalidEmail);
+        }
+
+        Ok(())
+    }
 }
+
+#[derive(Debug)]
+pub enum ValidationError {
+    NameRequired,
+    InvalidEmail,
+}
+
+impl std::fmt::Display for ValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValidationError::NameRequired => write!(f, "Name is required"),
+            ValidationError::InvalidEmail => write!(f, "Invalid email format"),
+        }
+    }
+}
+
+impl Error for ValidationError {}
 
 /// Handles the subscription request.
 ///
@@ -83,10 +110,10 @@ impl SubscribeRequest {
 /// }
 /// ```
 pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
-    if let Err(errors) = payload.validate() {
+    if let Err(error) = payload.validate() {
         return (
             StatusCode::UNPROCESSABLE_ENTITY,
-            format!("Validation error: {}", errors),
+            format!("Validation error: {}", error),
         )
             .into_response();
     }
@@ -123,5 +150,25 @@ mod tests {
 
         assert_eq!(request.name(), "Jane Doe");
         assert_eq!(request.email(), "jane@example.com");
+    }
+
+    #[test]
+    fn test_validation() {
+        let valid_request =
+            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
+        assert!(valid_request.validate().is_ok());
+
+        let empty_name = SubscribeRequest::new("".to_string(), "john@example.com".to_string());
+        assert!(matches!(
+            empty_name.validate(),
+            Err(ValidationError::NameRequired)
+        ));
+
+        let invalid_email =
+            SubscribeRequest::new("John Doe".to_string(), "invalid-email".to_string());
+        assert!(matches!(
+            invalid_email.validate(),
+            Err(ValidationError::InvalidEmail)
+        ));
     }
 }
