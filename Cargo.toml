@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies] 
 dotenvy = "0.15.7"
 eyre = "0.6"  # For convinient error handling  
-sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls"], default-features = false }
+sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls", "macros"], default-features = false }
 tokio = { version = "1", features = ["full"] }  
 axum = "0.8.3"
 serde = { version = "1", features = ["derive"] }
