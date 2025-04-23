@@ -70,14 +70,17 @@ impl SubscribeRequest {
 /// # Examples
 /// ```rust
 /// use axum::Form;
-/// use crate::SubscribeRequest;
+/// use newsletter_rs::handlers::subscriptions::{SubscribeRequest, subscribe};
 ///
-/// let form = Form(SubscribeRequest {
-///     name: "Jane Doe".to_string(),
-///     email: "jane.doe@example.com".to_string(),
-/// });
-/// let response = subscribe(form).await;
-/// assert_eq!(response, "Subscription successful!".to_string());
+/// #[tokio::main]
+/// async fn main() {
+///     let form = Form(SubscribeRequest::new(
+///         "Jane Doe".to_string(),
+///         "jane.doe@example.com".to_string(),
+///     ));
+///     let response = subscribe(form).await;
+///     assert_eq!(response.status(), axum::http::StatusCode::OK);
+/// }
 /// ```
 pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
     if let Err(errors) = payload.validate() {
@@ -104,7 +107,10 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_getters() {
-        let request = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
+        let request = SubscribeRequest::new(
+            "John Doe".to_string(),
+            "john@example.com".to_string(),
+        );
 
         assert_eq!(request.name(), "John Doe");
         assert_eq!(request.email(), "john@example.com");
@@ -112,8 +118,10 @@ mod tests {
 
     #[test]
     fn test_subscribe_request_setters() {
-        let mut request =
-            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
+        let mut request = SubscribeRequest::new(
+            "John Doe".to_string(),
+            "john@example.com".to_string(),
+        );
 
         request.set_name("Jane Doe".to_string());
         request.set_email("jane@example.com".to_string());
