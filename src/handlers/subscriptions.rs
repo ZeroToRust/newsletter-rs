@@ -1,4 +1,10 @@
 use serde::Deserialize;
+use validator::{Validate, ValidationError};
+use axum::{
+    extract::Form,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
 /// Represents the request payload for a subscription.
 ///
@@ -13,12 +19,14 @@ use serde::Deserialize;
 /// - `email(&self) -> &str`: Returns the email address of the subscriber.
 /// - `set_name(&mut self, name: String)`: Sets the name of the subscriber.
 /// - `set_email(&mut self, email: String)`: Sets the email address of the subscriber.
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct SubscribeRequest {
     /// The name of the subscriber.
+    #[validate(length(min = 1, message = "Name is required"))]
     name: String,
 
     /// The email address of the subscriber.
+    #[validate(email(message = "Invalid email format"))]
     email: String,
 }
 
@@ -44,7 +52,6 @@ impl SubscribeRequest {
     }
 }
 
-use axum::{extract::Form, response::IntoResponse};
 /// Handles the subscription request.
 ///
 /// This function processes a POST request with a form containing the subscriber's name and email.
@@ -68,7 +75,11 @@ use axum::{extract::Form, response::IntoResponse};
 /// let response = subscribe(form).await;
 /// assert_eq!(response, "Subscription successful!".to_string());
 /// ```
-pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> impl IntoResponse {
+pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
+    if let Err(errors) = payload.validate() {
+        return (StatusCode::BAD_REQUEST, format!("Validation error: {}", errors)).into_response();
+    }
+
     let subscription_info = format!(
         "New subscription:\nName: {}\nEmail: {}",
         payload.name(),
@@ -76,5 +87,35 @@ pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> impl IntoRespon
     );
     println!("{}", subscription_info);
 
-    "Subscription successful!".to_string()
+    (StatusCode::OK, "Subscription successful!").into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_subscribe_request_getters() {
+        let request = SubscribeRequest {
+            name: "John Doe".to_string(),
+            email: "john@example.com".to_string(),
+        };
+
+        assert_eq!(request.name(), "John Doe");
+        assert_eq!(request.email(), "john@example.com");
+    }
+
+    #[test]
+    fn test_subscribe_request_setters() {
+        let mut request = SubscribeRequest {
+            name: "John Doe".to_string(),
+            email: "john@example.com".to_string(),
+        };
+
+        request.set_name("Jane Doe".to_string());
+        request.set_email("jane@example.com".to_string());
+
+        assert_eq!(request.name(), "Jane Doe");
+        assert_eq!(request.email(), "jane@example.com");
+    }
 }
