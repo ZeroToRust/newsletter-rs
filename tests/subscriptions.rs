@@ -102,9 +102,7 @@ async fn database_connection_is_successful() {
     let pool: PgPool = common::get_database_pool().await;
 
     // Act: Attempt to query the database
-    let result = sqlx::query("SELECT 1")
-        .fetch_one(&pool)
-        .await;
+    let result = sqlx::query("SELECT 1").fetch_one(&pool).await;
 
     // Assert: Ensure the query succeeds
     assert!(result.is_ok());

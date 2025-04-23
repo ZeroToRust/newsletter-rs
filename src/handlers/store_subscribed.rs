@@ -1,9 +1,7 @@
-
-
 use super::{db_util::get_database_pool, subscriptions::SubscribeRequest};
 
 pub async fn store_subscriber(data: &SubscribeRequest) -> Result<(), sqlx::Error> {
-let pool = get_database_pool().await;
+    let pool = get_database_pool().await;
     sqlx::query!(
         r##"
         INSERT INTO subscriptions (name, email)
