@@ -13,7 +13,6 @@ serde = { version = "1", features = ["derive"] }
 serde_urlencoded = "0.7"
 tower = "0.5.2"
 tracing = "0.1"
-validator = { version = "0.16", features = ["derive"] }
 hyper = { version = "1.0", features = ["full"] }
 hyper-util = { version = "0.1.1", features = ["full"] }
 http-body-util = "0.1.1"
@@ -21,3 +20,13 @@ http-body-util = "0.1.1"
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }
 tokio-test = "0.4"
+
+[package.metadata.cargo-machete]
+ignored = [
+    "hyper",        # Used by axum
+    "hyper-util",   # Used by axum
+    "reqwest",      # Used in tests
+    "serde_urlencoded", # Used for form data parsing
+    "tokio-test",   # Used in tests
+    "tracing"       # Used for logging
+]
