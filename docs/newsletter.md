@@ -117,13 +117,13 @@ CREATE TABLE subscribers (
 13. Deployment
 
 - Web Hosting: Host your web server on a reliable platform.
-- Purpose: To make your application accessible to the public. It is used to choose a hosting provider that supports Rust and async web frameworks.
+
 - Cloud Services: Use cloud services like AWS, Heroku, or DigitalOcean to host your application.
-- Purpose: To leverage scalable and reliable infrastructure. It is used to deploy your application to a cloud platform for easy scaling and management.
+
 - Containerization: Use Docker to containerize your application for easier deployment and management.
-- Purpose: To ensure consistent and reproducible environments. It is used to create a Dockerfile to build and run your application in a container.
+
 - Database Hosting: Host your database on a reliable platform.
-- Purpose: To ensure the database is scalable and secure, It uses cloud database services like AWS RDS, Heroku Postgres, or DigitalOcean Managed Databases.
+
 - Database Scaling: Ensure your database can scale to handle a growing number of subscribers.
-- Purpose: To maintain performance as your user base grows. It is used to implement auto-scaling, read replicas, or other scaling strategies as needed.
+
 
