@@ -9,8 +9,8 @@ pub struct SubscriptionData {
 }
 
 pub async fn store_subscriber(data: &SubscriptionData) -> Result<(), sqlx::Error> {
-    dotenv().ok();
-    let durl = var("DATABASE_URL").unwrap();
+    dotenv().ok(); // Loads env variables from the .env file
+    let durl = var("DATABASE_URL").unwrap(); // Gets the database url from the .env file
     let pool = PgPool::connect(&durl).await.expect("Failed to connect to db");
 
     sqlx::query!(
@@ -25,6 +25,7 @@ pub async fn store_subscriber(data: &SubscriptionData) -> Result<(), sqlx::Error
     .await?;
     Ok(())
 }
+
 #[tokio::test]
 async fn test_store_subscriber() {
     // Arrange: Create a test subscription data
