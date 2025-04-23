@@ -41,7 +41,21 @@ jobs:
         with:
           tool: cargo-machete
           args: check --with-metadata
+      
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin
 
+      - name: Run Code Coverage with cargo-tarpaulin
+        run: |
+          cargo tarpaulin --out Html --fail-under 70
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: tarpaulin-report.html
           
   cargo-audit:
     runs-on: ubuntu-latest
