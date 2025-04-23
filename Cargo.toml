@@ -18,3 +18,13 @@ http-body-util = "0.1.1"
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }
 tokio-test = "0.4"
+
+[package.metadata.cargo-machete]
+ignored = [
+    "hyper",        # Used by axum
+    "hyper-util",   # Used by axum
+    "reqwest",      # Used in tests
+    "serde_urlencoded", # Used for form data parsing
+    "tokio-test",   # Used in tests
+    "tracing"       # Used for logging
+]
