@@ -1,4 +1,4 @@
-use super::{db_util::get_database_pool, subscriptions::SubscribeRequest};
+use super::{config::get_database_pool, subscriptions::SubscribeRequest};
 
 pub async fn store_subscriber(data: &SubscribeRequest) -> Result<(), sqlx::Error> {
     let pool = get_database_pool().await;
