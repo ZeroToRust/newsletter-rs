@@ -5,13 +5,12 @@ use axum::{
 use http_body_util::BodyExt;
 use newsletter_rs::handlers::subscriptions::SubscribeRequest;
 use sqlx::{PgPool, Row};
-use tower::ServiceExt;
 use testcontainers::{
     core::{IntoContainerPort, WaitFor},
     runners::AsyncRunner,
     GenericImage, ImageExt,
 };
-
+use tower::ServiceExt;
 
 mod common;
 
