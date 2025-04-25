@@ -1,5 +1,6 @@
 use axum::{
-    body::Body,  http::{Request, StatusCode}
+    body::Body,
+    http::{Request, StatusCode},
 };
 use http_body_util::BodyExt;
 use newsletter_rs::handlers::subscriptions::SubscribeRequest;
@@ -95,7 +96,7 @@ async fn subscribe_returns_422_for_invalid_email() {
 }
 
 #[tokio::test]
-#[ignore="No test container set yet"]
+#[ignore = "No test container set yet"]
 async fn database_connection_is_successful() {
     // Arrange
     let pool: PgPool = common::get_database_pool().await;
@@ -106,5 +107,3 @@ async fn database_connection_is_successful() {
     // Assert: Ensure the query succeeds
     assert!(result.is_ok());
 }
-
-
