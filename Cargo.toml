@@ -3,23 +3,21 @@ name = "newsletter-rs"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies] 
+[dependencies]
 dotenvy = "0.15.7"
-eyre = "0.6"  # For convinient error handling  
-sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls", "macros"], default-features = false }
-tokio = { version = "1", features = ["full"] }  
 axum = "0.8.3"
+eyre = "0.6"  # Error handling library
 serde = { version = "1", features = ["derive"] }
-serde_urlencoded = "0.7"
+serde_urlencoded = "0.7"  # For parsing form data
+sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls", "macros"], default-features = false }
+tokio = { version = "1", features = ["full"] }
 tower = "0.5.2"
 tracing = "0.1"
 hyper = { version = "1.0", features = ["full"] }
 hyper-util = { version = "0.1.1", features = ["full"] }
-http-body-util = "0.1.1"
 testcontainers-rs = "0.0.1"
-[dev-dependencies]
-reqwest = { version = "0.11", features = ["json"] }
-tokio-test = "0.4"
+http-body-util = "0.1.1"
+
 
 [package.metadata.cargo-machete]
 ignored = [

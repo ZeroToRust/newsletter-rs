@@ -1,10 +1,6 @@
-use axum::{
-    extract::Form,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::{extract::Form, http::StatusCode, response::IntoResponse};
+use eyre::{eyre, Result};
 use serde::Deserialize;
-use std::error::Error;
 
 /// Represents the request payload for a subscription.
 ///
@@ -53,35 +49,16 @@ impl SubscribeRequest {
         self.email = email;
     }
 
-    pub fn validate(&self) -> Result<(), ValidationError> {
+    pub fn validate(&self) -> Result<()> {
         if self.name.trim().is_empty() {
-            return Err(ValidationError::NameRequired);
+            return Err(eyre!("Name is required"));
         }
-
         if !self.email.contains('@') || !self.email.contains('.') {
-            return Err(ValidationError::InvalidEmail);
+            return Err(eyre!("Invalid email format"));
         }
-
         Ok(())
     }
 }
-
-#[derive(Debug)]
-pub enum ValidationError {
-    NameRequired,
-    InvalidEmail,
-}
-
-impl std::fmt::Display for ValidationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ValidationError::NameRequired => write!(f, "Name is required"),
-            ValidationError::InvalidEmail => write!(f, "Invalid email format"),
-        }
-    }
-}
-
-impl Error for ValidationError {}
 
 /// Handles the subscription request.
 ///
@@ -93,29 +70,10 @@ impl Error for ValidationError {}
 ///
 /// # Returns
 /// - `impl IntoResponse`: A string response confirming the subscription.
-///
-/// # Examples
-/// ```rust
-/// use axum::Form;
-/// use newsletter_rs::handlers::subscriptions::{SubscribeRequest, subscribe};
-///
-/// #[tokio::main]
-/// async fn main() {
-///     let form = Form(SubscribeRequest::new(
-///         "Jane Doe".to_string(),
-///         "jane.doe@example.com".to_string(),
-///     ));
-///     let response = subscribe(form).await;
-///     assert_eq!(response.status(), axum::http::StatusCode::OK);
-/// }
-/// ```
-pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
-    if let Err(error) = payload.validate() {
-        return (
-            StatusCode::UNPROCESSABLE_ENTITY,
-            format!("Validation error: {}", error),
-        )
-            .into_response();
+///   Handles the subscription request.
+pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> impl IntoResponse {
+    if let Err(e) = payload.validate() {
+        return (StatusCode::UNPROCESSABLE_ENTITY, e.to_string()).into_response();
     }
 
     let subscription_info = format!(
@@ -146,9 +104,9 @@ mod tests {
             SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
 
         request.set_name("Jane Doe".to_string());
-        request.set_email("jane@example.com".to_string());
-
         assert_eq!(request.name(), "Jane Doe");
+
+        request.set_email("jane@example.com".to_string());
         assert_eq!(request.email(), "jane@example.com");
     }
 
@@ -159,16 +117,19 @@ mod tests {
         assert!(valid_request.validate().is_ok());
 
         let empty_name = SubscribeRequest::new("".to_string(), "john@example.com".to_string());
-        assert!(matches!(
-            empty_name.validate(),
-            Err(ValidationError::NameRequired)
-        ));
+        assert!(
+            matches!(empty_name.validate().err(), Some(e) if e.to_string() == "Name is required")
+        );
 
         let invalid_email =
             SubscribeRequest::new("John Doe".to_string(), "invalid-email".to_string());
-        assert!(matches!(
-            invalid_email.validate(),
-            Err(ValidationError::InvalidEmail)
-        ));
+        assert!(
+            matches!(invalid_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
+        );
+
+        let empty_email = SubscribeRequest::new("John Doe".to_string(), "".to_string());
+        assert!(
+            matches!(empty_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
+        );
     }
 }
