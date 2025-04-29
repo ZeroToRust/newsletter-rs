@@ -1,70 +1,13 @@
+use super::config::get_database_pool;
 use axum::{
     extract::Form,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::Deserialize;
 use std::error::Error;
-
-/// Represents the request payload for a subscription.
-///
-/// This struct is used to deserialize the form data sent by the client.
-///
-/// # Fields
-/// - `name`: The name of the subscriber.
-/// - `email`: The email address of the subscriber.
-///
-/// # Methods
-/// - `name(&self) -> &str`: Returns the name of the subscriber.
-/// - `email(&self) -> &str`: Returns the email address of the subscriber.
-/// - `set_name(&mut self, name: String)`: Sets the name of the subscriber.
-/// - `set_email(&mut self, email: String)`: Sets the email address of the subscriber.
-#[derive(Debug, Deserialize)]
-pub struct SubscribeRequest {
-    /// The name of the subscriber.
-    name: String,
-
-    /// The email address of the subscriber.
-    email: String,
-}
-
-impl SubscribeRequest {
-    pub fn new(name: String, email: String) -> Self {
-        Self { name, email }
-    }
-
-    /// Returns the name of the subscriber.
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Returns the email address of the subscriber.
-    pub fn email(&self) -> &str {
-        &self.email
-    }
-
-    /// Sets the name of the subscriber.
-    pub fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-
-    /// Sets the email address of the subscriber.
-    pub fn set_email(&mut self, email: String) {
-        self.email = email;
-    }
-
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        if self.name.trim().is_empty() {
-            return Err(ValidationError::NameRequired);
-        }
-
-        if !self.email.contains('@') || !self.email.contains('.') {
-            return Err(ValidationError::InvalidEmail);
-        }
-
-        Ok(())
-    }
-}
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub enum ValidationError {
@@ -83,7 +26,66 @@ impl std::fmt::Display for ValidationError {
 
 impl Error for ValidationError {}
 
-/// Handles the subscription request.
+/// Represents the request payload for a subscription.
+///
+/// This struct is used to deserialize the form data sent by the client.
+///
+/// # Fields
+/// - `name`: The name of the subscriber.
+/// - `email`: The email address of the subscriber.
+
+#[derive(Debug, Deserialize)]
+pub struct SubscribeRequest {
+    pub name: String,
+    pub email: String,
+}
+
+impl SubscribeRequest {
+    pub fn new(name: String, email: String) -> Self {
+        Self { name, email }
+    }
+
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.name.trim().is_empty() {
+            return Err(ValidationError::NameRequired);
+        }
+
+        if !self.email.contains('@') || !self.email.contains('.') {
+            return Err(ValidationError::InvalidEmail);
+        }
+
+        Ok(())
+    }
+}
+///This struct is to add a subscribed user to the database database
+// #[derive(Debug, sqlx::FromRow)]
+pub struct SubscriptionRecord {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+    pub subscribed_at: NaiveDateTime,
+}
+
+impl SubscriptionRecord {
+    pub fn new(userdata: SubscribeRequest) -> Result<Self, ValidationError> {
+        let _ = match userdata.validate() {
+            Ok(_) => {}
+            Err(err) => {
+                println!("Error validating User: {err}");
+                return Err(err);
+            }
+        };
+
+        Ok(Self {
+            id: Uuid::new_v4(),
+            name: userdata.name,
+            email: userdata.email,
+            subscribed_at: Utc::now().naive_utc(),
+        })
+    }
+}
+
+/// Creates a subscription  request.
 ///
 /// This function processes a POST request with a form containing the subscriber's name and email.
 /// It prints the subscriber's information to the console and returns a response confirming the subscription.
@@ -109,49 +111,61 @@ impl Error for ValidationError {}
 ///     assert_eq!(response.status(), axum::http::StatusCode::OK);
 /// }
 /// ```
-pub async fn subscribe(Form(payload): Form<SubscribeRequest>) -> Response {
-    if let Err(error) = payload.validate() {
+
+pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
+    if let Err(validation_err) = userdata.validate() {
+        println!("Validation Error: {}", validation_err);
+        return (StatusCode::UNPROCESSABLE_ENTITY, validation_err.to_string()).into_response();
+    }
+    // Converting the subscriptionRequest to SubscriptionRecord
+    let subscription_record = match SubscriptionRecord::new(userdata) {
+        Ok(record) => record,
+        Err(validation_error) => {
+            println!("Validation Error: {}", validation_error);
+            return (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                validation_error.to_string(),
+            )
+                .into_response();
+        }
+    };
+    // Storing the user's data into the database
+    if let Err(db_error) = store_subscriber(&subscription_record).await {
+        println!("Database error: {}", db_error);
         return (
-            StatusCode::UNPROCESSABLE_ENTITY,
-            format!("Validation error: {}", error),
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to store subscription".to_string(),
         )
             .into_response();
     }
-
-    let subscription_info = format!(
+    println!(
         "New subscription:\nName: {}\nEmail: {}",
-        payload.name(),
-        payload.email()
+        subscription_record.name, subscription_record.email
     );
-    println!("{}", subscription_info);
-
     (StatusCode::OK, "Subscription successful!").into_response()
+}
+
+/// Adds the subscribed user into the database
+pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Error> {
+    let pool = get_database_pool().await;
+    sqlx::query!(
+        r##"
+        INSERT INTO subscriptions (id, name, email, subscribed_at)
+        VALUES ($1, $2, $3, $4)
+        "##,
+        data.id,
+        data.name,
+        data.email,
+        data.subscribed_at
+    )
+    .execute(&pool)
+    .await?;
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_subscribe_request_getters() {
-        let request = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
-
-        assert_eq!(request.name(), "John Doe");
-        assert_eq!(request.email(), "john@example.com");
-    }
-
-    #[test]
-    fn test_subscribe_request_setters() {
-        let mut request =
-            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
-
-        request.set_name("Jane Doe".to_string());
-        request.set_email("jane@example.com".to_string());
-
-        assert_eq!(request.name(), "Jane Doe");
-        assert_eq!(request.email(), "jane@example.com");
-    }
-
     #[test]
     fn test_validation() {
         let valid_request =
@@ -171,4 +185,15 @@ mod tests {
             Err(ValidationError::InvalidEmail)
         ));
     }
+}
+
+#[tokio::test]
+async fn test_subscribe_success() {
+    let form = Form(SubscribeRequest::new(
+        "John Doe".to_string(),
+        "john.doe@example.com".to_string(),
+    ));
+
+    let response = subscribe(form).await;
+    assert_eq!(response.status(), StatusCode::OK);
 }
