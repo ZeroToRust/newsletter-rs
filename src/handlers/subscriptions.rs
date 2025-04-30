@@ -242,17 +242,20 @@ mod tests {
         assert!(valid_request.validate().is_ok());
 
         let empty_name = SubscribeRequest::new("".to_string(), "john@example.com".to_string());
-        assert!(matches!(
-            empty_name.validate(),
-            Err(ValidationError::NameRequired)
-        ));
+        assert!(
+            matches!(empty_name.validate().err(), Some(e) if e.to_string() == "Name is required")
+        );
 
         let invalid_email =
             SubscribeRequest::new("John Doe".to_string(), "invalid-email".to_string());
-        assert!(matches!(
-            invalid_email.validate(),
-            Err(ValidationError::InvalidEmail)
-        ));
+        assert!(
+            matches!(invalid_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
+        );
+
+        let empty_email = SubscribeRequest::new("John Doe".to_string(), "".to_string());
+        assert!(
+            matches!(empty_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
+        );
     }
     // To see if the user has been added with success
     #[tokio::test]

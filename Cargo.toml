@@ -3,7 +3,7 @@ name = "newsletter-rs"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies] 
+[dependencies]
 dotenvy = "0.15.7"
 eyre = "0.6"  # For convinient error handling  
 sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls", "macros", "uuid", "chrono"], default-features = false }
