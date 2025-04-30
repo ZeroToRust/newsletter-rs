@@ -4,7 +4,9 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
+use lazy_static::lazy_static;
+use regex::Regex;
 use serde::Deserialize;
 use std::error::Error;
 use uuid::Uuid;
@@ -50,7 +52,7 @@ impl SubscribeRequest {
             return Err(ValidationError::NameRequired);
         }
 
-        if !self.email.contains('@') || !self.email.contains('.') {
+        if validate_email(self.email.clone()) {
             return Err(ValidationError::InvalidEmail);
         }
 
@@ -58,12 +60,12 @@ impl SubscribeRequest {
     }
 }
 ///This struct is to add a subscribed user to the database database
-// #[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct SubscriptionRecord {
     pub id: Uuid,
     pub name: String,
     pub email: String,
-    pub subscribed_at: NaiveDateTime,
+    pub subscribed_at: DateTime<Utc>,
 }
 
 impl SubscriptionRecord {
@@ -80,7 +82,7 @@ impl SubscriptionRecord {
             id: Uuid::new_v4(),
             name: userdata.name,
             email: userdata.email,
-            subscribed_at: Utc::now().naive_utc(),
+            subscribed_at: Utc::now(),
         })
     }
 }
@@ -139,8 +141,11 @@ pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
             .into_response();
     }
     println!(
-        "New subscription:\nName: {}\nEmail: {}",
-        subscription_record.name, subscription_record.email
+        "New subscription:\nID: {}\nName: {}\nEmail: {}\nSubcribed_At: {}",
+        subscription_record.id,
+        subscription_record.name,
+        subscription_record.email,
+        subscription_record.subscribed_at
     );
     (StatusCode::OK, "Subscription successful!").into_response()
 }
@@ -149,10 +154,10 @@ pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
 pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Error> {
     let pool = get_database_pool().await;
     sqlx::query!(
-        r##"
+        r#"
         INSERT INTO subscriptions (id, name, email, subscribed_at)
         VALUES ($1, $2, $3, $4)
-        "##,
+        "#,
         data.id,
         data.name,
         data.email,
@@ -161,6 +166,70 @@ pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Err
     .execute(&pool)
     .await?;
     Ok(())
+}
+
+lazy_static! {
+    // RFC 5322 compliant regex with some practical constraints
+    static ref EMAIL_REGEX: Regex = Regex::new(r"^(?i)[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$").unwrap();
+}
+
+pub fn validate_email(email: String) -> bool {
+    // Check length constraints
+    if email.is_empty() || email.len() > 254 {
+        return false;
+    }
+
+    // Check basic format with regex
+    if !EMAIL_REGEX.is_match(email.as_str()) {
+        return false;
+    }
+
+    // Additional checks
+    let parts: Vec<&str> = email.split('@').collect();
+    if parts.len() != 2 {
+        return false;
+    }
+
+    let local_part = parts[0];
+    let domain_part = parts[1];
+
+    // Local part length check
+    if local_part.len() > 64 {
+        return false;
+    }
+
+    // Domain part checks
+    if domain_part.len() > 253 {
+        return false;
+    }
+
+    // Check for consecutive dots
+    if local_part.contains("..") || domain_part.contains("..") {
+        return false;
+    }
+
+    // Check for valid TLD (at least 2 chars)
+    let domain_parts: Vec<&str> = domain_part.split('.').collect();
+    if domain_parts.len() < 2 {
+        return false;
+    }
+
+    let tld = domain_parts.last().unwrap();
+    if tld.len() < 2 {
+        return false;
+    }
+
+    // Check for valid domain parts
+    for part in domain_parts {
+        if part.is_empty() || part.len() > 63 {
+            return false;
+        }
+        if part.starts_with('-') || part.ends_with('-') {
+            return false;
+        }
+    }
+
+    true
 }
 
 #[cfg(test)]
@@ -185,15 +254,45 @@ mod tests {
             Err(ValidationError::InvalidEmail)
         ));
     }
-}
+    // To see if the user has been added with success
+    #[tokio::test]
+    async fn test_subscribe_success() {
+        let form = Form(SubscribeRequest::new(
+            "John Doe".to_string(),
+            "johndoe@example.com".to_string(),
+        ));
 
-#[tokio::test]
-async fn test_subscribe_success() {
-    let form = Form(SubscribeRequest::new(
-        "John Doe".to_string(),
-        "john.doe@example.com".to_string(),
-    ));
+        let response = subscribe(form).await;
+        assert_eq!(response.status(), StatusCode::OK);
+    }
 
-    let response = subscribe(form).await;
-    assert_eq!(response.status(), StatusCode::OK);
+    #[test]
+    fn test_invalid_emails() {
+        let invalid_emails = vec![
+            "plainaddress".to_string(),                                 // Missing @
+            "@no-local-part.com".to_string(),                           // Missing local part
+            "Outlook Contact <outlook-contact@domain.com>".to_string(), // Contains display name
+            "no-at-sign.net".to_string(),
+            "no-tld@domain".to_string(),                // Missing tld
+            ".email@domain.com".to_string(),            // Leading dot
+            "email.@domain.com".to_string(),            // Trailing dot
+            "email..email@domain.com".to_string(),      // Consecutive dots
+            "あいうえお@domain.com".to_string(), // Unicode in local part (may or may not be allowed depending on requirements)
+            "email@domain.com (Joe Smith)".to_string(), // Text after email
+            "email@domain..com".to_string(),     // Consecutive dots in domain
+            "email@-domain.com".to_string(),     // Leading hyphen in domain
+            "email@domain-.com".to_string(),     // Trailing hyphen in domain
+            "email@111.222.333.44444".to_string(), // Invalid IP address
+            "email@[123.123.123.123".to_string(), // Unclosed IP literal
+            "a@b.c".to_string(),                 // TLD too short
+            r#"this\ is\"really\"not\allowed@example.com"#.to_string(), // Spaces, quotes, and backslashes without proper escaping
+        ];
+
+        for email in invalid_emails {
+            assert!(
+                !validate_email(email.clone()),
+                "Failed on invalid email: {email}"
+            );
+        }
+    }
 }

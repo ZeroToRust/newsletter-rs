@@ -23,8 +23,7 @@ async fn subscribe_returns_200_for_valid_form_data_and_stores_user() {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .body(Body::from(format!(
                     "name={}&email={}",
-                    test_case.name,
-                    test_case.email
+                    test_case.name, test_case.email
                 )))
                 .unwrap(),
         )
