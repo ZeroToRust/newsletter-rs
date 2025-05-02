@@ -2,7 +2,6 @@ use postgres::Postgres;
 use testcontainers_modules::{postgres, testcontainers::runners::AsyncRunner};
 use tokio_postgres::NoTls;
 
-
 #[tokio::test]
 async fn test_postgres_version() {
     let container = Postgres::default().start().await.unwrap();
