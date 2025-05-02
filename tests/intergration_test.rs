@@ -20,7 +20,6 @@ async fn test_postgres_version() {
     let version: &str = row.get(0);
     println!("PostgreSQL version: {}", version);
     assert!(version.to_lowercase().contains("postgresql"));
-
 }
 
 #[tokio::test]
