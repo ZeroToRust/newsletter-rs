@@ -1,9 +1,7 @@
 use postgres::Postgres;
-use testcontainers_modules::{postgres, testcontainers::{core::{Mount, Image}, runners::AsyncRunner, ContainerRequest}};
-use tokio_postgres::{Client, NoTls};
-use std::{path::PathBuf, thread::sleep, time::Duration};
+use testcontainers_modules::{postgres, testcontainers::runners::AsyncRunner};
+use tokio_postgres::NoTls;
 
-use std::fs;
 
 #[tokio::test]
 async fn test_postgres_version() {
