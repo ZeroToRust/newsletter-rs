@@ -10,6 +10,7 @@ use tower::ServiceExt;
 mod common;
 
 #[tokio::test]
+#[ignore = "Needs database for storing user info. And testcontainer database are not yet ready"]
 async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<()> {
     // Arrange
     let app = common::spawn_app();

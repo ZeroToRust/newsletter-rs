@@ -260,6 +260,7 @@ mod tests {
     }
     // To see if the user has been added with success
     #[tokio::test]
+    #[ignore = "needs to access database and testcontainers are not yet available"]
     async fn test_subscribe_success() {
         let form = Form(SubscribeRequest::new(
             "John Doe".to_string(),
