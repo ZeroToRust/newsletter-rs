@@ -97,8 +97,6 @@ impl SubscriptionRecord {
 ///
 /// # Returns
 /// - `impl IntoResponse`: A string response confirming the subscription.
-///
-
 
 pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
     if let Err(validation_err) = userdata.validate() {
