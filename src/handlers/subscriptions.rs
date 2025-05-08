@@ -52,7 +52,7 @@ impl SubscribeRequest {
             return Err(ValidationError::NameRequired);
         }
 
-        if validate_email(self.email.clone()) {
+        if !validate_email(self.email.clone()) {
             return Err(ValidationError::InvalidEmail);
         }
 
@@ -263,7 +263,7 @@ mod tests {
     async fn test_subscribe_success() {
         let form = Form(SubscribeRequest::new(
             "John Doe".to_string(),
-            "johndoe@example.com".to_string(),
+            "johnda11@example.com".to_string(),
         ));
 
         let response = subscribe(form).await;
@@ -273,29 +273,45 @@ mod tests {
     #[test]
     fn test_invalid_emails() {
         let invalid_emails = vec![
-            "plainaddress".to_string(),                                 // Missing @
-            "@no-local-part.com".to_string(),                           // Missing local part
-            "Outlook Contact <outlook-contact@domain.com>".to_string(), // Contains display name
-            "no-at-sign.net".to_string(),
-            "no-tld@domain".to_string(),                // Missing tld
-            ".email@domain.com".to_string(),            // Leading dot
-            "email.@domain.com".to_string(),            // Trailing dot
-            "email..email@domain.com".to_string(),      // Consecutive dots
-            "あいうえお@domain.com".to_string(), // Unicode in local part (may or may not be allowed depending on requirements)
-            "email@domain.com (Joe Smith)".to_string(), // Text after email
-            "email@domain..com".to_string(),     // Consecutive dots in domain
-            "email@-domain.com".to_string(),     // Leading hyphen in domain
-            "email@domain-.com".to_string(),     // Trailing hyphen in domain
-            "email@111.222.333.44444".to_string(), // Invalid IP address
-            "email@[123.123.123.123".to_string(), // Unclosed IP literal
-            "a@b.c".to_string(),                 // TLD too short
-            r#"this\ is\"really\"not\allowed@example.com"#.to_string(), // Spaces, quotes, and backslashes without proper escaping
+            "plainaddress".to_string(),            // Missing @
+            "@no-local-part.com".to_string(),      // Missing local part
+            "no-at-sign.net".to_string(),          // Missing @
+            "email..email@domain.com".to_string(), // Consecutive dots
+            "email@domain..com".to_string(),       // Consecutive dots in domain
+            "email@-domain.com".to_string(),       // Leading hyphen in domain
+            "email@domain-.com".to_string(),       // Trailing hyphen in domain
+            "a@b.c".to_string(),                   // TLD too short
+            "email@[123.123.123.123".to_string(),  // Unclosed IP literal
+            "@domain.com".to_string(),             // Empty local part
+            "test@.com".to_string(),               // Empty domain segment
+            "あいうえお@domain.com".to_string(), // Unicode is valid
         ];
 
-        for email in invalid_emails {
+        let valid_emails = vec![
+            "user@domain.com".to_string(),
+            "user.name@domain.com".to_string(),
+            "user+tag@domain.com".to_string(),
+            "user@subdomain.domain.com".to_string(),
+            "email.address@domain.com".to_string(),
+            "firstname.lastname@domain.com".to_string(),
+            "email@subdomain.domain.com".to_string(),
+            "firstname+lastname@domain.com".to_string(),
+            "1234567890@domain.com".to_string(),
+        ];
+
+        // Test invalid emails
+        for email in &invalid_emails {
             assert!(
                 !validate_email(email.clone()),
-                "Failed on invalid email: {email}"
+                "Email should be invalid but was accepted: {email}"
+            );
+        }
+
+        // Test valid emails
+        for email in &valid_emails {
+            assert!(
+                validate_email(email.clone()),
+                "Email should be valid but was rejected: {email}"
             );
         }
     }

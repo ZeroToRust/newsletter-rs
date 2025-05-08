@@ -13,7 +13,7 @@ mod common;
 async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<()> {
     // Arrange
     let app = common::spawn_app();
-    let test_case = SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
+    let test_case = SubscribeRequest::new("John Doe".to_string(), "john1@example.com".to_string());
 
     // Act
     let response = app
