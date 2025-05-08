@@ -1,0 +1,118 @@
+use axum::{
+    body::Body,
+    http::{Request, StatusCode},
+};
+use eyre::Result;
+use http_body_util::BodyExt;
+use newsletter_rs::handlers::subscriptions::SubscribeRequest;
+use sqlx::PgPool;
+use tower::ServiceExt;
+mod common;
+
+#[tokio::test]
+#[ignore = "Needs database for storing user info. And testcontainer database are not yet ready"]
+async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<()> {
+    // Arrange
+    let app = common::spawn_app();
+    let test_case = SubscribeRequest::new("John Doe".to_string(), "john1@example.com".to_string());
+
+    // Act
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/subscriptions")
+                .method("POST")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(Body::from(format!(
+                    "name={}&email={}",
+                    test_case.name, test_case.email
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    // Assert: Ensure the response status is 200
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    assert_eq!(&body[..], b"Subscription successful!");
+
+    // Optional: Check if the user is stored in the database (uncomment once database is set up)
+    /*
+    let pool: PgPool = common::get_database_pool().await;
+    let row = sqlx::query("SELECT name, email FROM subscriptions WHERE email = $1")
+        .bind(test_case.email())
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to fetch user from database");
+
+    let stored_name: String = row.get("name");
+    let stored_email: String = row.get("email");
+
+    assert_eq!(stored_name, test_case.name());
+    assert_eq!(stored_email, test_case.email());
+    */
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn subscribe_returns_422_for_missing_data() -> Result<()> {
+    // Arrange
+    let app = common::spawn_app();
+
+    // Act
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/subscriptions")
+                .method("POST")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(Body::from("name=John%20Doe"))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    // Assert
+    assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn subscribe_returns_422_for_invalid_email() -> Result<()> {
+    // Arrange
+    let app = common::spawn_app();
+
+    // Act
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/subscriptions")
+                .method("POST")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(Body::from("name=John%20Doe&email=invalid-email"))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    // Assert
+    assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "No test container set yet"]
+async fn database_connection_is_successful() {
+    // Arrange
+    let pool: PgPool = common::get_database_pool().await;
+
+    // Act: Attempt to query the database
+    let result = sqlx::query("SELECT 1").fetch_one(&pool).await;
+
+    // Assert: Ensure the query succeeds
+    assert!(result.is_ok());
+}
