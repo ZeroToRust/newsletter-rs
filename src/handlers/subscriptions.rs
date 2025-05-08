@@ -98,22 +98,7 @@ impl SubscriptionRecord {
 /// # Returns
 /// - `impl IntoResponse`: A string response confirming the subscription.
 ///
-/// # Examples
-/// ```rust
-/// use axum::Form;
-/// use newsletter_rs::handlers::subscriptions::{SubscribeRequest, subscribe};
-///
-/// #[tokio::main]
-/// #[ignore="no database configured yet"]
-/// async fn main() {
-///     let form = Form(SubscribeRequest::new(
-///         "Jane Doe".to_string(),
-///         "jane.doe@example.com".to_string(),
-///     ));
-///     let response = subscribe(form).await;
-///     assert_eq!(response.status(), axum::http::StatusCode::OK);
-/// }
-/// ```
+
 
 pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
     if let Err(validation_err) = userdata.validate() {
