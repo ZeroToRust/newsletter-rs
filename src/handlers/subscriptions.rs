@@ -170,6 +170,7 @@ pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Err
 
 lazy_static! {
     // RFC 5322 compliant regex with some practical constraints
+    // Regex is a complex to compute so static allows us to increase performance by compiling it only once and share it across different threads for email validation.
     static ref EMAIL_REGEX: Regex = Regex::new(r"^(?i)[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$").unwrap();
 }
 
