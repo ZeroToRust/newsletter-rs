@@ -104,6 +104,7 @@ impl SubscriptionRecord {
 /// use newsletter_rs::handlers::subscriptions::{SubscribeRequest, subscribe};
 ///
 /// #[tokio::main]
+/// #[ignore="no database configured yet"]
 /// async fn main() {
 ///     let form = Form(SubscribeRequest::new(
 ///         "Jane Doe".to_string(),
