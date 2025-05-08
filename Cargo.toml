@@ -4,22 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-dotenvy = "0.15.7"
-eyre = "0.6"  # For convinient error handling  
-sqlx = { version = "0.8.0", features = ["postgres", "runtime-tokio-native-tls", "macros", "uuid", "chrono"], default-features = false }
+dotenvy = "0.15"
+eyre = "0.6"
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-native-tls", "macros", "uuid", "chrono"], default-features = false }
 tokio = { version = "1", features = ["full"] }  
-axum = "0.8.3"
+axum = "0.8"
 serde = { version = "1", features = ["derive"] }
-tower = "0.5.2"
+tower = "0.5"
 tracing = "0.1"
 hyper = { version = "1.0", features = ["full"] }
-hyper-util = { version = "0.1.1", features = ["full"] }
-http-body-util = "0.1.1"
-# testcontainers-rs = "0.0.1"
-chrono = { version = "0.4.41", features = ["serde"] }
+hyper-util = { version = "0.1", features = ["full"] }
+http-body-util = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
 regex = "1"
-lazy_static="1.4.0"
-uuid = {version = "1.16.0",features = ["v4"]}
+lazy_static="1.4"
+uuid = {version = "1.16",features = ["v4"]}
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }
