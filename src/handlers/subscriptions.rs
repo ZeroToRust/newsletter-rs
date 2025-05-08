@@ -284,7 +284,7 @@ mod tests {
             "email@[123.123.123.123".to_string(),  // Unclosed IP literal
             "@domain.com".to_string(),             // Empty local part
             "test@.com".to_string(),               // Empty domain segment
-            "あいうえお@domain.com".to_string(), // Unicode is valid
+            "あいうえお@domain.com".to_string(),   // Unicode is valid
         ];
 
         let valid_emails = vec![
