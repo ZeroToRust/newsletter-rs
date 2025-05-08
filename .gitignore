@@ -1,5 +1,4 @@
 /target
 .env
-Cargo.lock
 cobertura.xml
 
