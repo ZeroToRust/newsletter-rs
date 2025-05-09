@@ -8,7 +8,8 @@ axum = "0.8"
 dotenv = "0.15.0"
 eyre = "0.6"  # For convinient error handling  
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] } 
+
 [dev-dependencies]
-testcontainers-modules = { version = "0.11.6", features = ["blocking", "postgres"] }
-tokio = { version = "1", features = ["full"] }
+testcontainers-modules = { version = "0.11.6", features = ["postgres"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tokio-postgres = "0.7"
