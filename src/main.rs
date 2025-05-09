@@ -11,7 +11,6 @@ async fn main() -> Result<()> {
     axum::serve(address, app).await?;
     Ok(())
 }
-
 ///# Health check message
 async fn health_check() -> impl IntoResponse {
     StatusCode::OK

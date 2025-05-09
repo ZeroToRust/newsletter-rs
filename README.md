@@ -30,6 +30,25 @@ Ensure you have the following installed on your system:
    ```sh
    cargo build
    ```
+## Testing database setup
+
+**testcontainers** is a Rust library for running Docker containers in your tests (e.g. databases, services) to test real infrastructure.
+
+**testcontainers-modules** provides ready-to-use containers (like PostgreSQL, Redis, Kafka) built on top of **testcontainers**, so you don't have to configure them manually.
+
+We use [`testcontainers`](https://crates.io/crates/testcontainers) and [`testcontainers-modules`](https://crates.io/crates/testcontainers-modules) to run PostgreSQL in Docker for integration tests.
+
+### Features
+
+- Dynamic connection string per test run
+- Explicit container tag (`postgres:17.5`) for reproducibility
+- Compatible with both local runs and GitHub Actions
+
+### Running Tests
+
+```sh
+cargo test --all
+```
    
 ## Troubleshooting  
 - **Database Connection Issues:**  
