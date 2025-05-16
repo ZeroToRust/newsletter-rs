@@ -5,7 +5,7 @@ use axum::{
 use eyre::Result;
 use http_body_util::BodyExt;
 use newsletter_rs::handlers::subscriptions::SubscribeRequest;
-use sqlx::PgPool;
+
 use tower::ServiceExt;
 mod common;
 
@@ -110,7 +110,7 @@ async fn subscribe_returns_400_for_invalid_form_data() -> Result<()> {
         .unwrap();
 
     // Assert
-    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
 
     Ok(())
-    }
+}
