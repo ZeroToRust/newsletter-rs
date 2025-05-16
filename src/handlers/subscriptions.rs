@@ -22,6 +22,7 @@ pub enum SubscriptionError {
 }
 
 //  this implemetation is to distinguish the errors that can occur
+// during subscription of the user
 impl IntoResponse for SubscriptionError {
     fn into_response(self) -> Response {
         match self {
