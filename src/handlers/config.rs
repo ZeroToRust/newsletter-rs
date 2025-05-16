@@ -1,13 +1,20 @@
-use dotenvy::{self, dotenv, var};
+use dotenvy::{dotenv, var};
 use sqlx::PgPool;
-pub async fn get_database_pool() -> PgPool {
-    dotenvy::from_filename(".env").ok();
-    // Load the DATABASE_URL from the environment
-    dotenv().ok(); // Loads env variables from the .env file
-    let durl = var("DATABASE_URL").unwrap(); // Gets the database url from the .env file
-                                             // Create and return the connection pool
-    let pool = PgPool::connect(&durl)
-        .await
-        .expect("Failed to connect to database");
-    pool
+
+#[derive(Clone)]
+pub struct AppState {
+    pub db: PgPool,
+}
+
+impl AppState {
+    pub async fn new() -> Self {
+        dotenv().ok();
+        let database_url = var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+        let pool = PgPool::connect(&database_url)
+            .await
+            .expect("Failed to create database connection pool");
+
+        Self { db: pool }
+    }
 }

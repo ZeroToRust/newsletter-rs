@@ -9,7 +9,7 @@ mod common;
 #[tokio::test]
 async fn health_check_works() {
     // Arrange: Spawn the application
-    let app = common::spawn_app();
+    let app = common::spawn_app().await;
 
     // Act: Send a GET request to the /health_check endpoint
     let response = app

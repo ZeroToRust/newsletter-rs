@@ -1,12 +1,13 @@
 use axum::serve;
 use eyre::Result;
-use newsletter_rs::startup::build_app;
+use newsletter_rs::{handlers::config::AppState, startup::build_app};
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Build the application
-    let app = build_app();
+    let state = AppState::new().await;
+    let app = build_app(state);
 
     // Run the application
     let listener = TcpListener::bind("0.0.0.0:8080").await?;

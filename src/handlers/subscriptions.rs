@@ -1,6 +1,6 @@
-use super::config::get_database_pool;
+use super::config::AppState;
 use axum::{
-    extract::Form,
+    extract::{Form, State},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -8,25 +8,44 @@ use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
-use std::error::Error;
+use sqlx::{Pool, Postgres};
 use uuid::Uuid;
+use validator::{Validate, ValidationErrors};
 
+/// This is a custorm error
 #[derive(Debug)]
-pub enum ValidationError {
-    NameRequired,
-    InvalidEmail,
+pub enum SubscriptionError {
+    ValidationError(ValidationErrors),
+    DatabaseError(sqlx::Error),
+    EmailExists(String),
+    DatabaseConnectionError(String),
 }
 
-impl std::fmt::Display for ValidationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//  this implemetation is to distinguish the errors that can occur
+impl IntoResponse for SubscriptionError {
+    fn into_response(self) -> Response {
         match self {
-            ValidationError::NameRequired => write!(f, "Name is required"),
-            ValidationError::InvalidEmail => write!(f, "Invalid email format"),
+            Self::ValidationError(err) => {
+                (StatusCode::UNPROCESSABLE_ENTITY, err.to_string()).into_response()
+            }
+            Self::DatabaseError(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "A database error occurred.".to_string(),
+            )
+                .into_response(),
+            Self::EmailExists(email) => (
+                StatusCode::CONFLICT,
+                format!("Email {} is already registered", email),
+            )
+                .into_response(),
+            Self::DatabaseConnectionError(err) => (
+                StatusCode::SERVICE_UNAVAILABLE,
+                format!("Database connection error: {}", err),
+            )
+                .into_response(),
         }
     }
 }
-
-impl Error for ValidationError {}
 
 /// Represents the request payload for a subscription.
 ///
@@ -36,9 +55,11 @@ impl Error for ValidationError {}
 /// - `name`: The name of the subscriber.
 /// - `email`: The email address of the subscriber.
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct SubscribeRequest {
+    #[validate(length(min = 1))]
     pub name: String,
+    #[validate(email)]
     pub email: String,
 }
 
@@ -46,19 +67,8 @@ impl SubscribeRequest {
     pub fn new(name: String, email: String) -> Self {
         Self { name, email }
     }
-
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        if self.name.trim().is_empty() {
-            return Err(ValidationError::NameRequired);
-        }
-
-        if !validate_email(self.email.clone()) {
-            return Err(ValidationError::InvalidEmail);
-        }
-
-        Ok(())
-    }
 }
+
 ///This struct is to add a subscribed user to the database database
 #[derive(Debug, sqlx::FromRow)]
 pub struct SubscriptionRecord {
@@ -69,14 +79,8 @@ pub struct SubscriptionRecord {
 }
 
 impl SubscriptionRecord {
-    pub fn new(userdata: SubscribeRequest) -> Result<Self, ValidationError> {
-        let _ = match userdata.validate() {
-            Ok(_) => {}
-            Err(err) => {
-                println!("Error validating User: {err}");
-                return Err(err);
-            }
-        };
+    pub fn new(userdata: SubscribeRequest) -> Result<Self, ValidationErrors> {
+        userdata.validate()?;
 
         Ok(Self {
             id: Uuid::new_v4(),
@@ -85,6 +89,20 @@ impl SubscriptionRecord {
             subscribed_at: Utc::now(),
         })
     }
+}
+
+///This function is to check if the email the user is inputing already exists in the database and return appropriate error message to the user
+async fn email_exists(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
+    let result = sqlx::query!(
+        r#"
+        SELECT EXISTS(SELECT 1 FROM subscriptions WHERE email = $1)
+        "#,
+        email
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result.exists.unwrap_or(false))
 }
 
 /// Creates a subscription  request.
@@ -98,45 +116,45 @@ impl SubscriptionRecord {
 /// # Returns
 /// - `impl IntoResponse`: A string response confirming the subscription.
 
-pub async fn subscribe(Form(userdata): Form<SubscribeRequest>) -> Response {
-    if let Err(validation_err) = userdata.validate() {
-        println!("Validation Error: {}", validation_err);
-        return (StatusCode::UNPROCESSABLE_ENTITY, validation_err.to_string()).into_response();
-    }
-    // Converting the subscriptionRequest to SubscriptionRecord
-    let subscription_record = match SubscriptionRecord::new(userdata) {
-        Ok(record) => record,
-        Err(validation_error) => {
-            println!("Validation Error: {}", validation_error);
-            return (
-                StatusCode::UNPROCESSABLE_ENTITY,
-                validation_error.to_string(),
-            )
-                .into_response();
-        }
-    };
-    // Storing the user's data into the database
-    if let Err(db_error) = store_subscriber(&subscription_record).await {
-        println!("Database error: {}", db_error);
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to store subscription".to_string(),
-        )
-            .into_response();
-    }
-    println!(
+pub async fn subscribe(
+    State(state): State<AppState>,
+    Form(userdata): Form<SubscribeRequest>,
+) -> Result<impl IntoResponse, SubscriptionError> {
+    // Create subscription record
+    let subscription_record =
+        SubscriptionRecord::new(userdata).map_err(SubscriptionError::ValidationError)?;
+
+    // Store in database
+    store_subscriber(&subscription_record, &state.db).await?;
+
+    // Format success response
+    let subscribe_info = format!(
         "New subscription:\nID: {}\nName: {}\nEmail: {}\nSubcribed_At: {}",
         subscription_record.id,
         subscription_record.name,
         subscription_record.email,
         subscription_record.subscribed_at
     );
-    (StatusCode::OK, "Subscription successful!").into_response()
+    println!("{subscribe_info}\n"); // logging successful subscription and sending reply to user
+    Ok((StatusCode::OK, subscribe_info))
 }
 
 /// Adds the subscribed user into the database
-pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Error> {
-    let pool = get_database_pool().await;
+async fn store_subscriber(
+    data: &SubscriptionRecord,
+    pool: &Pool<Postgres>,
+) -> Result<(), SubscriptionError> {
+    // Check database connection
+    if let Err(e) = pool.acquire().await {
+        return Err(SubscriptionError::DatabaseConnectionError(e.to_string()));
+    }
+    // Check if email exists
+    match email_exists(&data.email, &pool).await {
+        Ok(true) => return Err(SubscriptionError::EmailExists(data.email.clone())),
+        Ok(false) => (), // proceed with insertion
+        Err(e) => return Err(SubscriptionError::DatabaseError(e)),
+    }
+    // Then insert the new  subscription
     sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, name, email, subscribed_at)
@@ -147,8 +165,9 @@ pub async fn store_subscriber(data: &SubscriptionRecord) -> Result<(), sqlx::Err
         data.email,
         data.subscribed_at
     )
-    .execute(&pool)
-    .await?;
+    .execute(pool)
+    .await
+    .map_err(SubscriptionError::DatabaseError)?;
     Ok(())
 }
 
@@ -158,146 +177,181 @@ lazy_static! {
     static ref EMAIL_REGEX: Regex = Regex::new(r"^(?i)[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$").unwrap();
 }
 
-pub fn validate_email(email: String) -> bool {
-    // Check length constraints
-    if email.is_empty() || email.len() > 254 {
-        return false;
-    }
-
-    // Check basic format with regex
-    if !EMAIL_REGEX.is_match(email.as_str()) {
-        return false;
-    }
-
-    // Additional checks
-    let parts: Vec<&str> = email.split('@').collect();
-    if parts.len() != 2 {
-        return false;
-    }
-
-    let local_part = parts[0];
-    let domain_part = parts[1];
-
-    // Local part length check
-    if local_part.len() > 64 {
-        return false;
-    }
-
-    // Domain part checks
-    if domain_part.len() > 253 {
-        return false;
-    }
-
-    // Check for consecutive dots
-    if local_part.contains("..") || domain_part.contains("..") {
-        return false;
-    }
-
-    // Check for valid TLD (at least 2 chars)
-    let domain_parts: Vec<&str> = domain_part.split('.').collect();
-    if domain_parts.len() < 2 {
-        return false;
-    }
-
-    let tld = domain_parts.last().unwrap();
-    if tld.len() < 2 {
-        return false;
-    }
-
-    // Check for valid domain parts
-    for part in domain_parts {
-        if part.is_empty() || part.len() > 63 {
-            return false;
-        }
-        if part.starts_with('-') || part.ends_with('-') {
-            return false;
-        }
-    }
-
-    true
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn test_validation() {
-        let valid_request =
-            SubscribeRequest::new("John Doe".to_string(), "john@example.com".to_string());
-        assert!(valid_request.validate().is_ok());
+    use dotenvy::{dotenv, var};
+    use sqlx::postgres::{PgPool, PgPoolOptions};
 
-        let empty_name = SubscribeRequest::new("".to_string(), "john@example.com".to_string());
-        assert!(
-            matches!(empty_name.validate().err(), Some(e) if e.to_string() == "Name is required")
-        );
+    // Helper function to create a test database pool
+    async fn setup_test_db() -> PgPool {
+        dotenv().ok();
+        let database_url = var("DATABASE_URL").expect("DATABASE_URL must be set for tests");
 
-        let invalid_email =
-            SubscribeRequest::new("John Doe".to_string(), "invalid-email".to_string());
-        assert!(
-            matches!(invalid_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
-        );
-
-        let empty_email = SubscribeRequest::new("John Doe".to_string(), "".to_string());
-        assert!(
-            matches!(empty_email.validate().err(), Some(e) if e.to_string() == "Invalid email format")
-        );
+        PgPoolOptions::new()
+            .max_connections(1)
+            .connect(&database_url)
+            .await
+            .expect("Failed to create test database pool")
     }
-    // To see if the user has been added with success
-    #[tokio::test]
-    #[ignore = "needs to access database and testcontainers are not yet available"]
-    async fn test_subscribe_success() {
-        let form = Form(SubscribeRequest::new(
-            "John Doe".to_string(),
-            "johnda11@example.com".to_string(),
-        ));
 
-        let response = subscribe(form).await;
-        assert_eq!(response.status(), StatusCode::OK);
+    // Helper function to create test app state
+    async fn setup_test_state() -> AppState {
+        AppState {
+            db: setup_test_db().await,
+        }
     }
 
     #[test]
-    fn test_invalid_emails() {
+    fn test_email_validation() {
+        // Invalid email addresses
         let invalid_emails = vec![
-            "plainaddress".to_string(),            // Missing @
-            "@no-local-part.com".to_string(),      // Missing local part
-            "no-at-sign.net".to_string(),          // Missing @
-            "email..email@domain.com".to_string(), // Consecutive dots
-            "email@domain..com".to_string(),       // Consecutive dots in domain
-            "email@-domain.com".to_string(),       // Leading hyphen in domain
-            "email@domain-.com".to_string(),       // Trailing hyphen in domain
-            "a@b.c".to_string(),                   // TLD too short
-            "email@[123.123.123.123".to_string(),  // Unclosed IP literal
-            "@domain.com".to_string(),             // Empty local part
-            "test@.com".to_string(),               // Empty domain segment
-            "あいうえお@domain.com".to_string(),   // Unicode is valid
+            "",                          // Empty string
+            "plainaddress",              // Missing @ and domain
+            "@missinglocal.org",         // Missing local part
+            "two@@domain.com",           // Multiple @ symbols
+            "invalid@domain@domain.com", // Multiple @ symbols
+            "invalid.com",               // Missing @
+            "invalid@domain.com.",       // Trailing dot in domain
+            "invalid@.com",              // Leading dot in domain
+            "invalid@domain..com",       // Multiple dots in domain
+            "invalid@domain@.com",       // Invalid domain format
+            "spaces in@domain.com",      // Spaces in local part
+            "invalid@dom ain.com",       // Spaces in domain
         ];
 
+        // Valid email addresses
         let valid_emails = vec![
-            "user@domain.com".to_string(),
-            "user.name@domain.com".to_string(),
-            "user+tag@domain.com".to_string(),
-            "user@subdomain.domain.com".to_string(),
-            "email.address@domain.com".to_string(),
-            "firstname.lastname@domain.com".to_string(),
-            "email@subdomain.domain.com".to_string(),
-            "firstname+lastname@domain.com".to_string(),
-            "1234567890@domain.com".to_string(),
+            "email@domain.com",              // Basic valid email
+            "firstname.lastname@domain.com", // With dot
+            "email@subdomain.domain.com",    // With subdomain
+            "firstname+lastname@domain.com", // With plus
+            "email@123.123.123.123",         // IP format domain
+            "1234567890@domain.com",         // Numeric local part
+            "email@domain-one.com",          // Domain with hyphen
+            "_______@domain.com",            // Underscores
+            "email@domain.name",             // Generic TLD
+            "email@domain.co.jp",            // Country code TLD
+            "firstname-lastname@domain.com", // With hyphen
+            "email@domain.web",              // Modern TLD
         ];
 
-        // Test invalid emails
-        for email in &invalid_emails {
+        for email in invalid_emails {
+            let request = SubscribeRequest::new("Test Name".to_string(), email.to_string());
+            let result = SubscriptionRecord::new(request);
             assert!(
-                !validate_email(email.clone()),
-                "Email should be invalid but was accepted: {email}"
+                result.is_err(),
+                "Email '{}' should be invalid but was accepted",
+                email
             );
         }
 
-        // Test valid emails
-        for email in &valid_emails {
+        for email in valid_emails {
+            let request = SubscribeRequest::new("Test Name".to_string(), email.to_string());
+            let result = SubscriptionRecord::new(request);
             assert!(
-                validate_email(email.clone()),
-                "Email should be valid but was rejected: {email}"
+                result.is_ok(),
+                "Email '{}' should be valid but was rejected",
+                email
             );
+        }
+    }
+
+    #[tokio::test]
+    async fn test_subscribe_success() -> Result<(), Box<dyn std::error::Error>> {
+        let state = setup_test_state().await;
+        let form = Form(SubscribeRequest::new(
+            "John Doe".to_string(),
+            "john.doe@example.com".to_string(),
+        ));
+
+        let response = subscribe(State(state), form)
+            .await
+            .expect("Failed to subscribe user");
+
+        assert_eq!(
+            response.into_response().status(),
+            StatusCode::OK,
+            "Expected successful subscription"
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_duplicate_email() -> Result<(), Box<dyn std::error::Error>> {
+        let state = setup_test_state().await;
+        let email = "test@example.com";
+
+        // First subscription
+        let form1 = Form(SubscribeRequest::new(
+            "Test User 1".to_string(),
+            email.to_string(),
+        ));
+        subscribe(State(state.clone()), form1)
+            .await
+            .expect("Failed to subscribe user");
+
+        // Second subscription with same email
+        let form2 = Form(SubscribeRequest::new(
+            "Test User 2".to_string(),
+            email.to_string(),
+        ));
+
+        let result = subscribe(State(state), form2).await;
+
+        match result {
+            Err(SubscriptionError::EmailExists(e)) => {
+                assert_eq!(e, email, "Expected email '{}' in error", email);
+                Ok(())
+            }
+            other => panic!(
+                "Expected EmailExists error, got {:?}",
+                other.unwrap().into_response()
+            ),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_database_connection_error() -> Result<(), Box<dyn std::error::Error>> {
+        // Create state with invalid database connection
+        let state = AppState {
+            db: PgPool::connect("postgresql://invalid:5432/nonexistent")
+                .await
+                .expect("Should fail to connect"),
+        };
+
+        let form = Form(SubscribeRequest::new(
+            "Test User".to_string(),
+            "test@example.com".to_string(),
+        ));
+
+        let result = subscribe(State(state), form).await;
+
+        match result {
+            Err(SubscriptionError::DatabaseConnectionError(_)) => Ok(()),
+            other => panic!(
+                "Expected DatabaseConnectionError, got {:?}",
+                other.unwrap().into_response()
+            ),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_validation_error() -> Result<(), Box<dyn std::error::Error>> {
+        let state = setup_test_state().await;
+        let form = Form(SubscribeRequest::new(
+            "".to_string(), // Empty name should fail validation
+            "valid@email.com".to_string(),
+        ));
+
+        let result = subscribe(State(state),form).await;
+
+        match result {
+            Err(SubscriptionError::ValidationError(_)) => Ok(()),
+            other => panic!(
+                "Expected ValidationError, got {:?}",
+                other.unwrap().into_response()
+            ),
         }
     }
 }

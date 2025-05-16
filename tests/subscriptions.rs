@@ -13,7 +13,7 @@ mod common;
 #[ignore = "Needs database for storing user info. And testcontainer database are not yet ready"]
 async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<()> {
     // Arrange
-    let app = common::spawn_app();
+    let app = common::spawn_app().await;
     let test_case = SubscribeRequest::new("John Doe".to_string(), "john1@example.com".to_string());
 
     // Act
@@ -35,23 +35,10 @@ async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<(
     // Assert: Ensure the response status is 200
     assert_eq!(response.status(), StatusCode::OK);
     let body = response.into_body().collect().await.unwrap().to_bytes();
-    assert_eq!(&body[..], b"Subscription successful!");
-
-    // Optional: Check if the user is stored in the database (uncomment once database is set up)
-    /*
-    let pool: PgPool = common::get_database_pool().await;
-    let row = sqlx::query("SELECT name, email FROM subscriptions WHERE email = $1")
-        .bind(test_case.email())
-        .fetch_one(&pool)
-        .await
-        .expect("Failed to fetch user from database");
-
-    let stored_name: String = row.get("name");
-    let stored_email: String = row.get("email");
-
-    assert_eq!(stored_name, test_case.name());
-    assert_eq!(stored_email, test_case.email());
-    */
+    let body_str = String::from_utf8(body.to_vec()).unwrap();
+    assert!(body_str.contains("New subscription:"));
+    assert!(body_str.contains("John Doe"));
+    assert!(body_str.contains("john1@example.com"));
 
     Ok(())
 }
@@ -59,7 +46,7 @@ async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<(
 #[tokio::test]
 async fn subscribe_returns_422_for_missing_data() -> Result<()> {
     // Arrange
-    let app = common::spawn_app();
+    let app = common::spawn_app().await;
 
     // Act
     let response = app
@@ -83,7 +70,7 @@ async fn subscribe_returns_422_for_missing_data() -> Result<()> {
 #[tokio::test]
 async fn subscribe_returns_422_for_invalid_email() -> Result<()> {
     // Arrange
-    let app = common::spawn_app();
+    let app = common::spawn_app().await;
 
     // Act
     let response = app
