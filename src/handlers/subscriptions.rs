@@ -8,7 +8,6 @@ use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
-use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 use validator::{Validate, ValidationErrors};
 
@@ -93,14 +92,14 @@ impl SubscriptionRecord {
 }
 
 ///This function is to check if the email the user is inputing already exists in the database and return appropriate error message to the user
-async fn email_exists(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
+async fn email_exists(email: &str, State(state): State<AppState>) -> Result<bool, sqlx::Error> {
     let result = sqlx::query!(
         r#"
         SELECT EXISTS(SELECT 1 FROM subscriptions WHERE email = $1)
         "#,
         email
     )
-    .fetch_one(pool)
+    .fetch_one(&state.db)
     .await?;
 
     Ok(result.exists.unwrap_or(false))
@@ -126,7 +125,7 @@ pub async fn subscribe(
         SubscriptionRecord::new(userdata).map_err(SubscriptionError::ValidationError)?;
 
     // Store in database
-    store_subscriber(&subscription_record, &state.db).await?;
+    store_subscriber(&subscription_record, State(state)).await?;
 
     // Format success response
     let subscribe_info = format!(
@@ -143,14 +142,14 @@ pub async fn subscribe(
 /// Adds the subscribed user into the database
 async fn store_subscriber(
     data: &SubscriptionRecord,
-    pool: &Pool<Postgres>,
+    State(state): State<AppState>,
 ) -> Result<(), SubscriptionError> {
     // Check database connection
-    if let Err(e) = pool.acquire().await {
-        return Err(SubscriptionError::DatabaseConnectionError(e.to_string()));
+    if let Err(err) = state.db.acquire().await {
+        return Err(SubscriptionError::DatabaseConnectionError(err.to_string()));
     }
     // Check if email exists
-    match email_exists(&data.email, &pool).await {
+    match email_exists(&data.email, State(state.clone())).await {
         Ok(true) => return Err(SubscriptionError::EmailExists(data.email.clone())),
         Ok(false) => (), // proceed with insertion
         Err(e) => return Err(SubscriptionError::DatabaseError(e)),
@@ -166,7 +165,7 @@ async fn store_subscriber(
         data.email,
         data.subscribed_at
     )
-    .execute(pool)
+    .execute(&state.db)
     .await
     .map_err(SubscriptionError::DatabaseError)?;
     Ok(())
