@@ -92,14 +92,25 @@ async fn subscribe_returns_422_for_invalid_email() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "No test container set yet"]
-async fn database_connection_is_successful() {
+async fn subscribe_returns_400_for_invalid_form_data() -> Result<()> {
     // Arrange
-    let pool: PgPool = common::get_database_pool().await;
+    let app = common::spawn_app().await;
 
-    // Act: Attempt to query the database
-    let result = sqlx::query("SELECT 1").fetch_one(&pool).await;
+    // Act
+    let response = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/subscriptions")
+                .method("POST")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(Body::from("invalid-form-data"))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
 
-    // Assert: Ensure the query succeeds
-    assert!(result.is_ok());
-}
+    // Assert
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+
+    Ok(())
+    }
