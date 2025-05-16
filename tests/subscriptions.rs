@@ -44,6 +44,7 @@ async fn subscribe_returns_200_for_valid_form_data_and_stores_user() -> Result<(
 }
 
 #[tokio::test]
+#[ignore = "Requires database access"]
 async fn subscribe_returns_422_for_missing_data() -> Result<()> {
     // Arrange
     let app = common::spawn_app().await;
@@ -68,6 +69,7 @@ async fn subscribe_returns_422_for_missing_data() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "Requires database access"]
 async fn subscribe_returns_422_for_invalid_email() -> Result<()> {
     // Arrange
     let app = common::spawn_app().await;
@@ -92,6 +94,7 @@ async fn subscribe_returns_422_for_invalid_email() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "Requires database access"]
 async fn subscribe_returns_400_for_invalid_form_data() -> Result<()> {
     // Arrange
     let app = common::spawn_app().await;
