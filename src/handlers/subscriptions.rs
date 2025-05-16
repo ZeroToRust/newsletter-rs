@@ -340,6 +340,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Requires database access"]
     async fn test_validation_error() -> Result<(), Box<dyn std::error::Error>> {
         let state = setup_test_state().await;
         let form = Form(SubscribeRequest::new(
