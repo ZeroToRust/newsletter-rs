@@ -1,7 +1,9 @@
+
 use testcontainers_modules::{
     postgres::Postgres,
     testcontainers::{self, runners::AsyncRunner, ImageExt},
 };
+
 pub struct TestDb {
     pub connection_string: String,
     _container: testcontainers::ContainerAsync<Postgres>,
@@ -10,9 +12,12 @@ pub struct TestDb {
 impl TestDb {
     pub async fn new() -> Self {
         let image = Postgres::default().with_tag("17.5"); // fixed tag
-        let container = image.start().await.unwrap();
+        let container = image.start().await.expect("failed to launch image");
 
-        let port = container.get_host_port_ipv4(5432).await.unwrap();
+        let port = container
+            .get_host_port_ipv4(5432)
+            .await
+            .expect("failed to get port");
         let conn_str = format!("postgres://postgres:postgres@localhost:{}/postgres", port);
 
         Self {
@@ -21,6 +26,8 @@ impl TestDb {
         }
     }
 }
+
+
 
 #[tokio::test]
 async fn test_postgres_query() {

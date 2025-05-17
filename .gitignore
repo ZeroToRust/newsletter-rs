@@ -1,1 +1,3 @@
 target/
+./tests/helper.rs
+./tests/helpre.rs
