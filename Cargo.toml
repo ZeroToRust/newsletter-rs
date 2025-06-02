@@ -9,3 +9,5 @@ eyre = "0.6"  # For convinient error handling
 tokio = { version = "1", features = ["full"] }  
 
 [dev-dependencies]
+hyper = "1.6.0"
+tower = "0.5.2"
