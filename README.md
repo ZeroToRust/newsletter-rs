@@ -30,6 +30,15 @@ Ensure you have the following installed on your system:
    ```sh
    cargo build
    ```
+
+
+### Running Tests
+
+- [Docker](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Docker recommend to run test)
+
+```sh
+cargo test --all
+```
    
 ## Troubleshooting  
 - **Database Connection Issues:**  
