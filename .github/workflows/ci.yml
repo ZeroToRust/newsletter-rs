@@ -61,12 +61,11 @@ jobs:
       - name: Check 70% threshold
         run: |
           COVERAGE=$(cargo tarpaulin --workspace | grep -oP '\d+\.\d+(?=% coverage)')
-          THRESHOLD = 70
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            echo "Coverage ${COVERAGE}% below $THRESHOLD%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% below 70%"
             exit 1
           else
-            echo "✅ Coverage ${COVERAGE}% meets threshold ${THRESHOLD}%"
+            echo "✅ Coverage ${COVERAGE}% meets threshold 70%"
           fi
       
       - name: Upload coverage artifact
