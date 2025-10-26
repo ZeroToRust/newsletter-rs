@@ -54,18 +54,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Generate code coverage
+      - name: Generate coverage with threshold check
         run: |
-          cargo tarpaulin --verbose --workspace --out xml --out html --output-dir ./coverage
-      
-      - name: Check 70% threshold
-        run: |
-          COVERAGE=$(cargo tarpaulin --workspace | grep -oP '\d+\.\d+(?=% coverage)')
-          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-            echo "Coverage ${COVERAGE}% below 70%"
+          cargo tarpaulin --verbose --workspace --out xml --out html --output-dir ./coverage > coverage_output.txt 2>&1
+          cat coverage_output.txt
+          
+          COVERAGE=$(grep -oP '\d+\.\d+(?=% coverage)' coverage_output.txt | head -1)
+          
+          if [ -z "$COVERAGE" ]; then
+            echo "Failed to extract coverage"
             exit 1
-          else
-            echo "✅ Coverage ${COVERAGE}% meets threshold 70%"
+          fi
+          
+          echo "Coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            exit 1
           fi
       
       - name: Upload coverage artifact
