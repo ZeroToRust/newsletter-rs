@@ -8,4 +8,19 @@ axum = "0.8"
 eyre = "0.6"  # For convinient error handling  
 tokio = { version = "1", features = ["full"] }  
 
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "tests/health_check.rs"
+name = "health_check"
+
+
+# [[bin]]
+# path = "src/main.rs"
+# name = "newsletter-rs"
+
 [dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio-test = "0.4"
