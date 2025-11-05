@@ -7,14 +7,14 @@ edition = "2021"
 axum = "0.8"  
 eyre = "0.6"  # For convinient error handling  
 tokio = { version = "1", features = ["full"] }  
-
+serde = { version = "1.0.228", features = ["derive"]}
 
 [lib]
 path = "src/lib.rs"
 
-[[bin]]
-path = "tests/health_check.rs"
-name = "health_check"
+# [[bin]]
+# path = "tests/health_check_test.rs"
+# name = "health_check_test"
 
 
 # [[bin]]

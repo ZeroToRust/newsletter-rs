@@ -1,8 +1,10 @@
 name: CI Pipeline
 
 on:
+  push:
   pull_request:
-
+    branches: [main]
+  
 jobs:
   ci-checks:
     name: Run CI checks
@@ -40,8 +42,41 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-          args: check --with-metadata
+          # args: check --with-metadata
 
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    needs: ci-checks
+    container:
+      image: xd009642/tarpaulin
+      options: --security-opt seccomp=unconfined
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Generate coverage with threshold check
+        run: |
+          cargo tarpaulin --verbose --workspace --out xml --out html --output-dir ./coverage > coverage_output.txt 2>&1
+          cat coverage_output.txt
+          
+          COVERAGE=$(grep -oP '\d+\.\d+(?=% coverage)' coverage_output.txt | head -1)
+          
+          if [ -z "$COVERAGE" ]; then
+            echo "Failed to extract coverage"
+            exit 1
+          fi
+          
+          echo "Coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            exit 1
+          fi
+      
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
           
   cargo-audit:
     runs-on: ubuntu-latest
