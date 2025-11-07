@@ -1,6 +1,6 @@
 // use eyre::Result;
 
-use newsletter_rs::serve_args;
+use newsletter_rs::startup::serve_args;
 
 /// Entry point for different services
 #[tokio::main]

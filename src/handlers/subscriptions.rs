@@ -4,7 +4,7 @@ use axum::{
     response::IntoResponse,
 };
 
-use crate::database::data_base::*;
+use crate::database::{FormUsers, UserDB};
 
 pub async fn subscribe(
     State(db): State<UserDB>,
