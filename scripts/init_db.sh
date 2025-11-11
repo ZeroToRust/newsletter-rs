@@ -2,7 +2,7 @@
 set -x
 set -eo pipefail
 
-# --- Vérification des dépendances ---
+# --- check dependencies ---
 if ! [ -x "$(command -v psql)" ]; then
   echo >&2 "❌ Error: psql is not installed."
   exit 1
@@ -15,18 +15,13 @@ if ! [ -x "$(command -v sqlx)" ]; then
   exit 1
 fi
 
-# --- Nettoyage des anciens conteneurs et volumes Postgres ---
-# echo "🧹 Cleaning up old PostgreSQL containers and volumes (if any)..."
-# docker rm -f $(docker ps -aq --filter ancestor=postgres) 2>/dev/null || true
-# docker volume prune -f 2>/dev/null || true
-
-# --- Variables d'environnement ---
+# --- environnement  variables---
 DB_USER=${POSTGRES_USER:=postgres}
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 
-# --- Lancement du conteneur Docker ---
+# --- run Docker ---
 if [[ -z "${SKIP_DOCKER}" ]]
 then
   echo "🚀 Starting PostgreSQL container with Docker..."
@@ -39,7 +34,7 @@ then
     postgres -N 1000
 fi
 
-# --- Attente que Postgres soit prêt ---
+# --- waiting postgres to be ready ---
 export PGPASSWORD="${DB_PASSWORD}"
 
 echo "⏳ Waiting for PostgreSQL to become available..."
@@ -51,7 +46,7 @@ done
 
 >&2 echo "✅ Postgres is up and running on port ${DB_PORT}!"
 
-# --- Configuration et migration ---
+# --- integration and Configuration ---
 export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 
 echo "🛠️  Creating database if not exists..."
@@ -60,4 +55,4 @@ sqlx database create
 echo "📦 Running database migrations..."
 sqlx migrate run
 
->&2 echo "🎉 PostgreSQL has been migrated successfully and is ready to go!"
+>&2 echo "PostgreSQL has been migrated successfully and is ready to go!"
