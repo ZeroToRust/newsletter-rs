@@ -1,10 +1,16 @@
-use axum::{routing::{get, post}, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 use tokio::net::TcpListener;
-use std::{collections::HashMap, sync::{Arc, Mutex}};
 
-use crate::handlers::health::health_check;
-use crate::handlers::subscriptions::{subscribe, get_subscribers};
 use crate::database::{FormUsers, UserDB};
+use crate::handlers::health::health_check;
+use crate::handlers::subscriptions::{get_subscribers, subscribe};
 
 fn app_builder() -> Router {
     let default_user = HashMap::from([(1, FormUsers::new("MArthe", "marthe@gmail.com"))]);
