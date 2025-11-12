@@ -24,7 +24,6 @@ async fn health_check_test() {
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
-
     let (listener, addr) = serve_args().await.unwrap();
 
     let add = listener.local_addr().unwrap();
@@ -36,12 +35,12 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     let form_data = "email=rolland%40gmail.com&name=rolland";
     let client = reqwest::Client::new();
     let response = client
-                            .post(&format!("http://{}/api/subscriptions",add))
-                            .header("Content-Type", "application/x-www-form-urlencoded")
-                            .body(form_data)
-                            .send()
-                            .await
-                            .unwrap();
+        .post(&format!("http://{}/api/subscriptions", add))
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(form_data)
+        .send()
+        .await
+        .unwrap();
 
     assert_eq!(201, response.status());
     // println!("status: {:?}", response);

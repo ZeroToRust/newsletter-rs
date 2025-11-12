@@ -22,17 +22,17 @@ async fn main() {
         response.push((resp.status(), "0".to_string()));
     }
 
-
     for user_id in 1..=form_data.len() as u16 {
-    // let user_id = 1u16;
+        // let user_id = 1u16;
         let resp = client
-                   .get(&format!("http://127.0.0.1:{port}/api/subscriptions/{user_id}"))
-                   .send()
-                   .await
-                   .unwrap();
+            .get(&format!(
+                "http://127.0.0.1:{port}/api/subscriptions/{user_id}"
+            ))
+            .send()
+            .await
+            .unwrap();
         response.push((resp.status(), resp.text().await.unwrap()));
     }
 
     println!("status: {:#?}", response);
-    
 }

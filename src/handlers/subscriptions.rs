@@ -19,10 +19,7 @@ pub async fn subscribe(
     StatusCode::CREATED
 }
 
-pub async fn get_subscribers(
-    State(db): State<UserDB>,
-     Path(id): Path<u16>) -> impl IntoResponse 
-     {
+pub async fn get_subscribers(State(db): State<UserDB>, Path(id): Path<u16>) -> impl IntoResponse {
     let users = db.lock().unwrap();
     let user = users.get(&id).unwrap();
     (StatusCode::OK, Json(user.clone()))
