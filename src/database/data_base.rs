@@ -5,17 +5,17 @@ use std::{
 // use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct FormUsers {
-    pub user_name: String,
-    pub user_email: String,
+    pub name: String,
+    pub email: String,
 }
 
 impl FormUsers {
     pub fn new(name: &str, email: &str) -> Self {
         Self {
-            user_name: name.to_string(),
-            user_email: email.to_string(),
+            name: name.to_string(),
+            email: email.to_string(),
         }
     }
 }
