@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use newsletter_rs::{database::FormUsers, startup::serve_args};
+use newsletter_rs::startup::serve_args;
 
 #[tokio::test]
 async fn health_check_test() {
