@@ -1,8 +1,4 @@
 # .cargo/audit.toml
 [advisories]
-ignore = [
-    "RUSTSEC-2023-0071"  # TODO: Remove when rsa crate is fixed
-]
-
-[advisories.RUSTSEC-2023-0071]
-reason = "No fix available, acceptable risk for current use case"
+ignore = ["RUSTSEC-2023-0071"]
+# TODO: Remove when rsa crate is fixed
