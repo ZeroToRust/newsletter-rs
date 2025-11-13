@@ -42,7 +42,7 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-          args: check --with-metadata
+          # args: check --with-metadata
 
   coverage:
     name: Code coverage
