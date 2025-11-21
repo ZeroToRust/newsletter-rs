@@ -58,7 +58,7 @@ jobs:
       - uses: taiki-e/install-action@nextest
 
       - name: Generate coverage with 70% threshold
-        run: cargo llvm-cov --all-features --workspace --lcov --html --output-dir ./coverage --fail-under-lines 70
+        run: cargo llvm-cov --all-features --workspace --html --output-dir ./coverage --fail-under-lines 70
 
       - name: Upload code coverage artifact
         uses: actions/upload-artifact@v4
