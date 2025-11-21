@@ -53,13 +53,12 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
       
-      - name: Install cargo-tarpaulin
-        uses: taiki-e/install-action@v2
-        with:
-         tool: cargo-tarpaulin
+      - name: Install cargo-llvm-cov and nextest
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
 
       - name: Generate coverage with 70% threshold
-        run: cargo tarpaulin --workspace --out xml --out html --output-dir ./coverage --fail-under 70
+        run: cargo llvm-cov --all-features --workspace --lcov --html --output-dir ./coverage --fail-under-lines 70
 
       - name: Upload code coverage artifact
         uses: actions/upload-artifact@v4

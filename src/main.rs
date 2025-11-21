@@ -1,22 +1,25 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use eyre::Result;
-use tokio::net::TcpListener;
+use newsletter_rs::build_app;
 
 /// Entry point for different services
 #[tokio::main]
 async fn main() -> Result<()> {
-    let app = Router::new().route("/health_check", get(health_check));
-    let address = TcpListener::bind("0.0.0.0:8080").await?;
+    let (app, address) = build_app().await?;
     println!("Server serving on {}", address.local_addr()?);
     axum::serve(address, app).await?;
     Ok(())
 }
 
-///# Health check message
-async fn health_check() -> impl IntoResponse {
-    StatusCode::OK
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-/// This test module is to pass the workflow checks
-#[test]
-fn testing_to_pass_workflow() {}
+    #[tokio::test]
+    async fn test_build_app_creates_router_and_listener() {
+        let result = build_app().await;
+        assert!(result.is_ok());
+
+        let (_, listener) = result.unwrap();
+        assert!(listener.local_addr().is_ok());
+    }
+}
