@@ -2,7 +2,8 @@ name: CI Pipeline
 
 on:
   pull_request:
-
+    branches: [main]
+  
 jobs:
   ci-checks:
     name: Run CI checks
@@ -40,8 +41,30 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-          args: check --with-metadata
+      - run: cargo machete --with-metadata
 
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      
+      - name: Install cargo-llvm-cov and nextest
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
+
+      - name: Generate coverage with 70% threshold
+        run: cargo llvm-cov --all-features --workspace --html --output-dir ./coverage --fail-under-lines 70
+
+      - name: Upload code coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
           
   cargo-audit:
     runs-on: ubuntu-latest

@@ -1,0 +1,4 @@
+# .cargo/audit.toml
+# [advisories]
+# ignore = ["RUSTSEC-2023-0071"]
+# # TODO: Remove when rsa crate is fixed

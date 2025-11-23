@@ -1,4 +1,4 @@
-/// Returns a greeting message.
-pub fn example_function() -> &'static str {
-    "Hello, world!"
-}
+pub mod configuration;
+pub mod database;
+pub mod handlers;
+pub mod startup;
