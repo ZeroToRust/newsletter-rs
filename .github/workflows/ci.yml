@@ -1,7 +1,6 @@
 name: CI Pipeline
 
 on:
-  push:
   pull_request:
     branches: [main]
   
@@ -42,38 +41,27 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-machete
-          # args: check --with-metadata
+      - run: cargo machete --with-metadata
 
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
-    needs: ci-checks
-    container:
-      image: xd009642/tarpaulin
-      options: --security-opt seccomp=unconfined
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Generate coverage with threshold check
-        run: |
-              cargo tarpaulin --verbose --workspace --out xml --out html --output-dir ./coverage > coverage_output.txt 2>&1
-              cat coverage_output.txt
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-              COVERAGE=$(grep -oP '\d+\.\d+(?=% coverage)' coverage_output.txt | head -1)
-          
-              if [ -z "$COVERAGE" ]; then
-                echo "Failed to extract coverage"
-                exit 1
-              fi
-
-              echo "Coverage: ${COVERAGE}%"
-              if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-                exit 1
-              fi
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       
-      - name: Upload coverage artifact
+      - name: Install cargo-llvm-cov and nextest
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
+
+      - name: Generate coverage with 70% threshold
+        run: cargo llvm-cov --all-features --workspace --html --output-dir ./coverage --fail-under-lines 70
+
+      - name: Upload code coverage artifact
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: coverage-report
           path: coverage/

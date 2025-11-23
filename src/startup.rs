@@ -29,3 +29,33 @@ pub async fn serve_args() -> Result<(TcpListener, Router), std::io::Error> {
     println!("Server serving on {}", address.local_addr().unwrap().port());
     Ok((address, app))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_app_builder() {
+        let app = app_builder();
+
+        // Test that the router is created successfully
+        assert!(!format!("{:?}", app).is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_serve_args() {
+        let result = serve_args().await;
+
+        // Test that the function returns Ok
+        assert!(result.is_ok());
+
+        let (listener, app) = result.unwrap();
+
+        // Test that we get a valid TcpListener
+        let local_addr = listener.local_addr().unwrap();
+        assert_eq!(local_addr.ip().to_string(), "127.0.0.1");
+        assert!(local_addr.port() > 0);
+
+        // Test that we get a valid Router
+        assert!(!format!("{:?}", app).is_empty());
+    }
+}
