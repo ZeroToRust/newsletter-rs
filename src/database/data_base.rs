@@ -4,7 +4,6 @@ use std::{
 };
 // use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
-
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct FormUsers {
     pub name: String,

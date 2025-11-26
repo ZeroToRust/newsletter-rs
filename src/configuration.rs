@@ -2,19 +2,29 @@ use config::{Config, File};
 //Our application congigurations
 #[derive(serde::Deserialize, Default)]
 pub struct Settings{
-    pub database: DatabaseSetting,
+    pub database: DatabaseSettings,
     pub app_port: u16,
 }
 
 
 #[derive(serde::Deserialize, Default)]
-pub struct DatabaseSetting{
+pub struct DatabaseSettings{
     pub username: String,
     pub password: String,
     pub port: u16,
     pub host: String,
     pub database_name: String,
 }
+
+impl DatabaseSettings{
+    pub fn get_database_url(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+         self.username,self.password, self.host, self.port, self.database_name
+        )
+    }
+}
+
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
