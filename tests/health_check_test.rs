@@ -1,9 +1,10 @@
 use axum::http::StatusCode;
-use newsletter_rs::startup::serve_args;
+use newsletter_rs::{configuration::get_configuration, startup::serve_builder};
 
 #[tokio::test]
 async fn health_check_test() {
-    let (address, app) = serve_args().await.unwrap();
+    let setting =get_configuration().expect("Fail to read configuration");
+    let (address, app) = serve_builder(setting).await.unwrap();
 
     let add = address.local_addr().unwrap();
     tokio::spawn(async move {
@@ -24,7 +25,8 @@ async fn health_check_test() {
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
-    let (listener, addr) = serve_args().await.unwrap();
+    let setting =get_configuration().expect("Fail to read configuration");
+    let (listener, addr) = serve_builder(setting).await.unwrap();
 
     let add = listener.local_addr().unwrap();
     tokio::spawn(async move {

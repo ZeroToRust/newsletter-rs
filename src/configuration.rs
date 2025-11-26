@@ -1,12 +1,13 @@
 use config::{Config, File};
 //Our application congigurations
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Default)]
 pub struct Settings{
     pub database: DatabaseSetting,
     pub app_port: u16,
 }
 
-#[derive(serde::Deserialize)]
+
+#[derive(serde::Deserialize, Default)]
 pub struct DatabaseSetting{
     pub username: String,
     pub password: String,

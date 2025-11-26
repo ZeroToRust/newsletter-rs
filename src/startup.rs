@@ -8,7 +8,7 @@ use std::{
 };
 use tokio::net::TcpListener;
 
-use crate::database::{FormUsers, UserDB};
+use crate::{Settings, database::{FormUsers, UserDB}};
 use crate::handlers::health::health_check;
 use crate::handlers::subscriptions::{get_subscribers, subscribe};
 
@@ -23,8 +23,8 @@ fn app_builder() -> Router {
         .with_state(db)
 }
 
-pub async fn serve_args() -> Result<(TcpListener, Router), std::io::Error> {
-    let address = TcpListener::bind("127.0.0.1:0").await?;
+pub async fn serve_builder(settings: Settings) -> Result<(TcpListener, Router), std::io::Error> {
+    let address = TcpListener::bind(format!("127.0.0.1:{}", settings.app_port)).await?;
     let app = app_builder();
     println!("Server serving on {}", address.local_addr().unwrap().port());
     Ok((address, app))
@@ -42,8 +42,9 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_serve_args() {
-        let result = serve_args().await;
+    async fn test_serve_builder() {
+        let settings = Settings {app_port: 0, ..Default::default()};
+        let result = serve_builder(settings).await;
 
         // Test that the function returns Ok
         assert!(result.is_ok());
