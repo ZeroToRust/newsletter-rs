@@ -30,6 +30,6 @@ tokio-test = "0.4"
 version = "0.8.6"
 default-features = false
 features = ["runtime-tokio-rustls", "macros",
-"postgres", "uuid", "chrono", "migrate"
+"postgres", "uuid", "time", "migrate"
 ]
 

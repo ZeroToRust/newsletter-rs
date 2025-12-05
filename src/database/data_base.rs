@@ -1,7 +1,5 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc};
+use sqlx::PgPool;
 // use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -19,4 +17,8 @@ impl FormUsers {
     }
 }
 
-pub type UserDB = Arc<Mutex<HashMap<u16, FormUsers>>>;
+pub struct AppState{
+    pub pool: PgPool,
+}
+
+pub type UserDB = Arc<AppState>;
