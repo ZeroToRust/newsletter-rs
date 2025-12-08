@@ -13,14 +13,14 @@ pub async fn subscribe(
     Form(payload): Form<FormUsers>,
 ) -> impl IntoResponse {
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         "INSERT INTO subscriptions (id, email, name, subscribed_at)
-         VALUES ($1, $2, $3, $4)"
-    )
-    .bind(Uuid::new_v4())
-    .bind(&payload.email)
-    .bind(&payload.name)
-    .bind(OffsetDateTime::now_utc())
+         VALUES ($1, $2, $3, $4)", 
+         Uuid::new_v4(),
+         payload.email,
+         payload.name,
+         OffsetDateTime::now_utc()
+        )
     .execute(&db.pool)
     .await;
 
